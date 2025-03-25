@@ -1,0 +1,98 @@
+@page "/history"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="history-container">
+    <h2>Game History</h2>
+    
+    @if (games.Count == 0)
+    {
+        <p>No games played yet!</p>
+    }
+    else
+    {
+        <div class="games-list">
+            @foreach (var game in games)
+            {
+                <div class="game-card" @onclick="() => ViewGame(game.Id)">
+                    <div class="game-date">@game.Date.ToString("MMM d, yyyy")</div>
+                    <div class="game-teams">@game.GroupA vs @game.GroupB</div>
+                    <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
+                    <div class="game-winner">
+                        @if (game.GroupATotal > game.GroupBTotal)
+                        {
+                            <span>@game.GroupA wins!</span>
+                        }
+                        else if (game.GroupBTotal > game.GroupATotal)
+                        {
+                            <span>@game.GroupB wins!</span>
+                        }
+                        else
+                        {
+                            <span>Tie game</span>
+                        }
+                    </div>
+                </div>
+            }
+        </div>
+        
+        <button class="btn danger" @onclick="ConfirmClearHistory">Clear All History</button>
+    }
+    
+    @if (showConfirmation)
+    {
+        <div class="modal-overlay">
+            <div class="modal">
+                <h3>Confirm Delete</h3>
+                <p>Are you sure you want to delete all game history?</p>
+                <div class="modal-actions">
+                    <button class="btn secondary" @onclick="() => showConfirmation = false">Cancel</button>
+                    <button class="btn danger" @onclick="ClearHistory">Delete All</button>
+                </div>
+            </div>
+        </div>
+    }
+    
+    <div class="button-container">
+        <button class="btn secondary" @onclick="BackToHome">Back</button>
+    </div>
+</div>
+
+@code {
+    private List<Game> games = new List<Game>();
+    private bool showConfirmation = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGames();
+    }
+    
+    private async Task LoadGames()
+    {
+        games = await DbService.GetGamesAsync();
+    }
+
+    private void ViewGame(int id)
+    {
+        Navigation.NavigateTo($"/gameresult/{id}");
+    }
+    
+    private void ConfirmClearHistory()
+    {
+        showConfirmation = true;
+    }
+    
+    private async Task ClearHistory()
+    {
+        await DbService.DeleteAllGamesAsync();
+        games.Clear();
+        showConfirmation = false;
+    }
+
+    private void BackToHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+}

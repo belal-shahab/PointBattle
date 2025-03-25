@@ -1,0 +1,194 @@
+@page "/game/{Id:int}"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="game-container">
+    <div class="header">
+        <h2>@game.GroupA vs @game.GroupB</h2>
+        <div class="score-display">
+            <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
+                @game.GroupATotal
+            </div>
+            <div class="vs">VS</div>
+            <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
+                @game.GroupBTotal
+            </div>
+        </div>
+
+        @if (game.IsGroupAWinConfirmed())
+        {
+            <div class="alert alert-success">
+                <strong>@game.GroupA has already won!</strong> @game.GroupB needs @game.PointsNeededForGroupB() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
+            </div>
+        }
+        else if (game.IsGroupBWinConfirmed())
+        {
+            <div class="alert alert-success">
+                <strong>@game.GroupB has already won!</strong> @game.GroupA needs @game.PointsNeededForGroupA() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
+            </div>
+        }
+
+        <div class="round-counter">
+            Round @(game.Rounds.Count) of @Game.MaxRounds
+        </div>
+    </div>
+
+    <div class="rounds-container">
+        <h3>Rounds</h3>
+        @foreach (var round in game.Rounds)
+        {
+            <div class="round">
+                <div class="round-header">Round @round.RoundNumber</div>
+                <div class="round-scores">
+                    <div class="round-score">@round.GroupAPoints</div>
+                    <div class="round-score">@round.GroupBPoints</div>
+                </div>
+                <div class="round-actions">
+                    <button class="edit-button" @onclick="() => EditRound(round)">Edit</button>
+                </div>
+            </div>
+        }
+    </div>
+
+    @if (game.Rounds.Count < Game.MaxRounds && !game.IsCompleted)
+    {
+        <div class="new-round">
+            <h3>New Round</h3>
+            <div class="input-group">
+                <label>@game.GroupA</label>
+                <input type="number" @bind="newRoundA" max="@Game.MaxPointsPerRound"/>
+                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+            </div>
+            <div class="input-group">
+                <label>@game.GroupB</label>
+                <input type="number" @bind="newRoundB" max="@Game.MaxPointsPerRound"/>
+                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+            </div>
+            <button class="btn primary" @onclick="AddRound">Add Round</button>
+        </div>
+    }
+
+    @if (editingRound != null)
+    {
+        <div class="modal-overlay">
+            <div class="modal">
+                <h3>Edit Round @editingRound.RoundNumber</h3>
+                <div class="input-group">
+                    <label>@game.GroupA</label>
+                    <input type="number" @bind="editingRound.GroupAPoints" max="@Game.MaxPointsPerRound"/>
+                </div>
+                <div class="input-group">
+                    <label>@game.GroupB</label>
+                    <input type="number" @bind="editingRound.GroupBPoints" max="@Game.MaxPointsPerRound"/>
+                </div>
+                <div class="modal-actions">
+                    <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
+                    <button class="btn primary" @onclick="SaveEdit">Save</button>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="actions">
+        <button class="btn secondary" @onclick="BackToHome">Home</button>
+        <button class="btn warning" @onclick="FinishGame">End Game</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Game game = new Game();
+    private int newRoundA;
+    private int newRoundB;
+    private Round editingRound;
+    private Round originalRound;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGame();
+    }
+
+    private async Task LoadGame()
+    {
+        game = await DbService.GetGameAsync(Id) ?? new Game();
+    }
+
+    private async Task AddRound()
+    {
+        if (game.Rounds.Count >= Game.MaxRounds) return;
+
+        var round = new Round
+        {
+            RoundNumber = game.Rounds.Count + 1,
+            GroupAPoints = Math.Min(newRoundA, Game.MaxPointsPerRound),
+            GroupBPoints = Math.Min(newRoundB, Game.MaxPointsPerRound)
+        };
+
+        game.Rounds.Add(round);
+        await DbService.SaveGameAsync(game);
+
+        newRoundA = 0;
+        newRoundB = 0;
+
+// Check if this was the last round
+        if (game.Rounds.Count >= Game.MaxRounds)
+        {
+            await FinishGame();
+        }
+    }
+
+    private void EditRound(Round round)
+    {
+        originalRound = round;
+        editingRound = new Round
+        {
+            Id = round.Id,
+            GameId = round.GameId,
+            RoundNumber = round.RoundNumber,
+            GroupAPoints = round.GroupAPoints,
+            GroupBPoints = round.GroupBPoints
+        };
+    }
+
+    private void CancelEdit()
+    {
+        editingRound = null;
+    }
+
+    private async Task SaveEdit()
+    {
+        if (editingRound != null)
+        {
+            originalRound.GroupAPoints = editingRound.GroupAPoints;
+            originalRound.GroupBPoints = editingRound.GroupBPoints;
+
+            await DbService.UpdateRoundAsync(originalRound);
+            editingRound = null;
+
+            await LoadGame();
+        }
+    }
+
+    private async Task FinishGame()
+    {
+        if (game.GroupATotal > game.GroupBTotal)
+            game.Winner = game.GroupA;
+        else if (game.GroupBTotal > game.GroupATotal)
+            game.Winner = game.GroupB;
+        else
+            game.Winner = "Tie";
+
+        game.IsCompleted = true;
+        await DbService.SaveGameAsync(game);
+        Navigation.NavigateTo("/gameresult/" + Id);
+    }
+
+    private void BackToHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+}

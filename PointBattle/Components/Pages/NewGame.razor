@@ -1,0 +1,50 @@
+@page "/newgame"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject NavigationManager Navigation
+@inject DatabaseService DbService
+
+<div class="container">
+    <h2>New Game</h2>
+
+    <div class="form-group">
+        <label>Group A Name:</label>
+        <input @bind="groupAName" placeholder="Group A"/>
+    </div>
+
+    <div class="form-group">
+        <label>Group B Name:</label>
+        <input @bind="groupBName" placeholder="Group B"/>
+    </div>
+
+    <div class="button-container">
+        <button class="btn secondary" @onclick="Cancel">Cancel</button>
+        <button class="btn primary" @onclick="StartGame">Start Game</button>
+    </div>
+</div>
+
+@code {
+    private string groupAName = "Group A";
+    private string groupBName = "Group B";
+
+    private void Cancel()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private async Task StartGame()
+    {
+// Create a completely new Game object instead of reusing one
+        var game = new Game
+        {
+            GroupA = groupAName,
+            GroupB = groupBName,
+            Date = DateTime.Now,
+            IsCompleted = false
+        };
+
+        var id = await DbService.SaveGameAsync(game);
+        Navigation.NavigateTo($"/game/{id}");
+    }
+
+}

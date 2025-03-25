@@ -1,0 +1,26 @@
+@page "/"
+@inject NavigationManager Navigation
+
+<div class="main-container">
+    <div class="title">
+        <h1>PointBattle</h1>
+        <p>Track your game points with friends!</p>
+    </div>
+    
+    <div class="button-container">
+        <button class="btn primary" @onclick="NewGame">New Game</button>
+        <button class="btn secondary" @onclick="ViewHistory">Game History</button>
+    </div>
+</div>
+
+@code {
+    private void NewGame()
+    {
+        Navigation.NavigateTo("/newgame");
+    }
+
+    private void ViewHistory()
+    {
+        Navigation.NavigateTo("/history");
+    }
+}

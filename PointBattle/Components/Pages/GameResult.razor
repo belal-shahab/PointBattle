@@ -1,0 +1,92 @@
+@page "/gameresult/{Id:int}"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="result-container">
+    <h2>Game Result</h2>
+
+    <div class="final-score">
+        <div class="team">
+            <h3>@game.GroupA</h3>
+            <div class="points @(game.GroupATotal > game.GroupBTotal ? "winner" : "")">
+                @game.GroupATotal
+            </div>
+        </div>
+        <div class="vs">VS</div>
+        <div class="team">
+            <h3>@game.GroupB</h3>
+            <div class="points @(game.GroupBTotal > game.GroupATotal ? "winner" : "")">
+                @game.GroupBTotal
+            </div>
+        </div>
+    </div>
+
+    <div class="winner-announcement contrast-text">
+        @if (game.GroupATotal > game.GroupBTotal)
+        {
+            <h2>@game.GroupA Wins!</h2>
+        }
+        else if (game.GroupBTotal > game.GroupATotal)
+        {
+            <h2>@game.GroupB Wins!</h2>
+        }
+        else
+        {
+            <h2>It's a Tie!</h2>
+        }
+    </div>
+
+    <div class="round-summary">
+        <h3>Round Summary</h3>
+        <div class="rounds-table">
+            <table>
+                <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>@game.GroupA</th>
+                    <th>@game.GroupB</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var round in game.Rounds)
+                {
+                    <tr>
+                        <td>Round @round.RoundNumber</td>
+                        <td>@round.GroupAPoints</td>
+                        <td>@round.GroupBPoints</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="button-container">
+        <button class="btn secondary" @onclick="BackToHome">Home</button>
+        <button class="btn primary" @onclick="NewGame">New Game</button>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+
+    private Game game = new Game();
+
+    protected override async Task OnInitializedAsync()
+    {
+        game = await DbService.GetGameAsync(Id) ?? new Game();
+    }
+
+    private void BackToHome()
+    {
+        Navigation.NavigateTo("/");
+    }
+
+    private void NewGame()
+    {
+        Navigation.NavigateTo("/newgame");
+    }
+
+}

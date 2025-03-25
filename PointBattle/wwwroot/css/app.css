@@ -86,3 +86,367 @@ h1:focus {
         padding-left: env(safe-area-inset-left);
     }
 }
+
+
+:root {
+    --primary-color: #4CAF50;
+    --secondary-color: #2196F3;
+    --warning-color: #FF9800;
+    --danger-color: #F44336;
+    --light-color: #f5f5f5;
+    --dark-color: #333;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--light-color);
+    color: var(--dark-color);
+}
+
+.container, .game-container, .result-container, .history-container, .main-container {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+h1, h2, h3 {
+    color: var(--primary-color);
+}
+
+.btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.1s;
+    margin: 5px;
+}
+
+.btn:active {
+    transform: scale(0.98);
+}
+
+.primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.secondary {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.warning {
+    background-color: var(--warning-color);
+    color: white;
+}
+
+.danger {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.score-display {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.score {
+    font-size: 42px;
+    font-weight: bold;
+    padding: 15px 30px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.winning {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.vs {
+    font-size: 18px;
+    margin: 0 15px;
+    font-weight: bold;
+}
+
+.rounds-container {
+    margin: 20px 0;
+}
+
+.round {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 10px;
+    box-shadow: var(--box-shadow);
+}
+
+.round-header {
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.round-scores {
+    display: flex;
+    justify-content: space-around;
+}
+
+.round-score {
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.new-round {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: var(--box-shadow);
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+    font-size: 16px;
+}
+
+.final-score {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 30px 0;
+}
+
+.team {
+    text-align: center;
+}
+
+.points {
+    font-size: 64px;
+    font-weight: bold;
+    padding: 20px;
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    min-width: 100px;
+    text-align: center;
+}
+
+.winner-announcement {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.games-list {
+    margin: 20px 0;
+}
+
+.game-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: var(--box-shadow);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.game-card:hover {
+    transform: translateY(-3px);
+}
+
+.game-date {
+    color: #777;
+    font-size: 14px;
+}
+
+.game-teams {
+    font-weight: bold;
+    margin: 5px 0;
+    font-size: 18px;
+}
+
+.game-score {
+    font-size: 24px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.game-winner {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    text-align: center;
+}
+
+.title {
+    margin-bottom: 40px;
+}
+
+.title h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+/* Add these to your existing CSS */
+
+.alert {
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.alert-success {
+    background-color: #d1e7dd;
+    color: #0f5132;
+    border: 1px solid #badbcc;
+}
+
+.round-counter {
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    margin: 10px 0;
+}
+
+.helper-text {
+    display: block;
+    font-size: 12px;
+    color: #666;
+    margin-top: 2px;
+}
+
+.edit-button {
+    background-color: #4b5563;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 3px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.round-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 5px;
+}
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background-color: white;
+    border-radius: 8px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.danger {
+    background-color: #dc3545;
+    color: white;
+}
+
+.contrast-text {
+    color: white !important;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.round-summary {
+    margin: 20px 0;
+}
+
+.rounds-table {
+    overflow-x: auto;
+}
+
+.rounds-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.rounds-table th, .rounds-table td {
+    padding: 8px 12px;
+    text-align: center;
+    border-bottom: 1px solid #ddd;
+}
+
+.rounds-table th {
+    background-color: #f5f5f5;
+}
