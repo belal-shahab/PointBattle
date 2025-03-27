@@ -44,19 +44,19 @@
         </div>
     }
 
-    @if (showDeleteConfirm)
-    {
-        <div class="modal-overlay">
-            <div class="modal">
-                <h3>Confirm Delete</h3>
-                <p>Are you sure you want to delete this game?</p>
-                <div class="modal-actions">
-                    <button class="btn secondary" @onclick="CancelDelete">Cancel</button>
-                    <button class="btn danger" @onclick="ConfirmDelete">Delete</button>
+    <!--@if (showDeleteConfirm)
+        {
+            <div class="modal-overlay">
+                <div class="modal">
+                    <h3>Confirm Delete</h3>
+                    <p>Are you sure you want to delete this game?</p>
+                    <div class="modal-actions">
+                        <button class="btn secondary" @onclick="CancelDelete">Cancel</button>
+                        <button class="btn danger" @onclick="ConfirmDelete">Delete</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    }
+        }-->
 
     <div class="button-container">
         <button class="btn secondary" @onclick="BackToHome">Back</button>
@@ -87,6 +87,7 @@
     {
         gameIdToDelete = id;
         showDeleteConfirm = true;
+        ConfirmDelete();
     }
 
     private void CancelDelete()
