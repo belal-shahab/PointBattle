@@ -5,96 +5,132 @@
 @inject NavigationManager Navigation
 
 <div class="game-container">
-    <div class="header">
-        <h2>@game.GroupA vs @game.GroupB</h2>
-        <div class="score-display">
-            <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
-                @game.GroupATotal
-            </div>
-            <div class="vs">VS</div>
-            <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
-                @game.GroupBTotal
-            </div>
-        </div>
-
-        @if (game.IsGroupAWinConfirmed())
-        {
-            <div class="alert alert-success">
-                <strong>@game.GroupA has already won!</strong> @game.GroupB needs @game.PointsNeededForGroupB() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
-            </div>
-        }
-        else if (game.IsGroupBWinConfirmed())
-        {
-            <div class="alert alert-success">
-                <strong>@game.GroupB has already won!</strong> @game.GroupA needs @game.PointsNeededForGroupA() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
-            </div>
-        }
-
-        <div class="round-counter">
-            Round @(game.Rounds.Count) of @Game.MaxRounds
-        </div>
-    </div>
-
-    <div class="rounds-container">
-        <h3>Rounds</h3>
-        @foreach (var round in game.Rounds)
-        {
-            <div class="round">
-                <div class="round-header">Round @round.RoundNumber</div>
-                <div class="round-scores">
-                    <div class="round-score">@round.GroupAPoints</div>
-                    <div class="round-score">@round.GroupBPoints</div>
-                </div>
-                <div class="round-actions">
-                    <button class="edit-button" @onclick="() => EditRound(round)">Edit</button>
-                </div>
-            </div>
-        }
-    </div>
-
-    @if (game.Rounds.Count < Game.MaxRounds && !game.IsCompleted)
+    @if (loading)
     {
-        <div class="new-round">
-            <h3>New Round</h3>
-            <div class="input-group">
-                <label>@game.GroupA</label>
-                <input type="number" @bind="newRoundA" max="@Game.MaxPointsPerRound"/>
-                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
-            </div>
-            <div class="input-group">
-                <label>@game.GroupB</label>
-                <input type="number" @bind="newRoundB" max="@Game.MaxPointsPerRound"/>
-                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
-            </div>
-            <button class="btn primary" @onclick="AddRound">Add Round</button>
+        <div class="loading">
+            <p>Loading game data...</p>
         </div>
     }
-
-    @if (editingRound != null)
+    else if (loadError)
     {
-        <div class="modal-overlay">
-            <div class="modal">
-                <h3>Edit Round @editingRound.RoundNumber</h3>
+        <div class="alert alert-danger">
+            <p>Error loading game: @errorMessage</p>
+            <button class="btn primary" @onclick="BackToHome">Back to Home</button>
+        </div>
+    }
+    else
+    {
+        <div class="header">
+            <h2>@game.GroupA vs @game.GroupB</h2>
+            <div class="score-display">
+                <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
+                    @game.GroupATotal
+                </div>
+                <div class="vs">VS</div>
+                <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
+                    @game.GroupBTotal
+                </div>
+            </div>
+
+            @if (game.Rounds.Count > 0)
+            {
+                @if (game.IsGroupAWinConfirmed())
+                {
+                    <div class="alert alert-success">
+                        <strong>@game.GroupA has already won!</strong>
+                        @game.GroupB needs @game.PointsNeededForGroupB() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
+                    </div>
+                }
+                else if (game.IsGroupBWinConfirmed())
+                {
+                    <div class="alert alert-success">
+                        <strong>@game.GroupB has already won!</strong>
+                        @game.GroupA needs @game.PointsNeededForGroupA() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
+                    </div>
+                }
+            }
+
+            <div class="round-counter">
+                Round @(game.Rounds.Count) of @Game.MaxRounds
+            </div>
+        </div>
+
+        <div class="rounds-container">
+            <h3>Rounds</h3>
+            @foreach (var round in game.Rounds)
+            {
+                <div class="round">
+                    <div class="round-header">Round @round.RoundNumber</div>
+                    <div class="round-scores">
+                        <div class="round-score">@round.GroupAPoints</div>
+                        <div class="round-score">@round.GroupBPoints</div>
+                    </div>
+                    <div class="round-actions">
+                        <button class="edit-button" @onclick="() => EditRound(round)">Edit</button>
+                        <button class="delete-button" @onclick="() => DeleteRound(round)">Delete</button>
+                    </div>
+                </div>
+            }
+        </div>
+
+        @if (game.Rounds.Count < Game.MaxRounds && !game.IsCompleted)
+        {
+            <div class="new-round">
+                <h3>New Round</h3>
                 <div class="input-group">
                     <label>@game.GroupA</label>
-                    <input type="number" @bind="editingRound.GroupAPoints" max="@Game.MaxPointsPerRound"/>
+                    <input type="number" @bind="newRoundA" max="@Game.MaxPointsPerRound"/>
+                    <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
                 </div>
                 <div class="input-group">
                     <label>@game.GroupB</label>
-                    <input type="number" @bind="editingRound.GroupBPoints" max="@Game.MaxPointsPerRound"/>
+                    <input type="number" @bind="newRoundB" max="@Game.MaxPointsPerRound"/>
+                    <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
                 </div>
-                <div class="modal-actions">
-                    <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
-                    <button class="btn primary" @onclick="SaveEdit">Save</button>
+                <button class="btn primary" @onclick="AddRound">Add Round</button>
+            </div>
+        }
+
+        @if (editingRound != null)
+        {
+            <div class="modal-overlay">
+                <div class="modal">
+                    <h3>Edit Round @editingRound.RoundNumber</h3>
+                    <div class="input-group">
+                        <label>@game.GroupA</label>
+                        <input type="number" @bind="editingRoundA" max="@Game.MaxPointsPerRound"/>
+                    </div>
+                    <div class="input-group">
+                        <label>@game.GroupB</label>
+                        <input type="number" @bind="editingRoundB" max="@Game.MaxPointsPerRound"/>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
+                        <button class="btn primary" @onclick="SaveEdit">Save</button>
+                    </div>
                 </div>
             </div>
+        }
+
+        @if (showDeleteConfirm)
+        {
+            <div class="modal-overlay">
+                <div class="modal">
+                    <h3>Confirm Delete</h3>
+                    <p>Are you sure you want to delete this round?</p>
+                    <div class="modal-actions">
+                        <button class="btn secondary" @onclick="CancelDelete">Cancel</button>
+                        <button class="btn danger" @onclick="ConfirmDelete">Delete</button>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="actions">
+            <button class="btn secondary" @onclick="BackToHome">Home</button>
+            <button class="btn warning" @onclick="FinishGame">End Game</button>
         </div>
     }
-
-    <div class="actions">
-        <button class="btn secondary" @onclick="BackToHome">Home</button>
-        <button class="btn warning" @onclick="FinishGame">End Game</button>
-    </div>
 </div>
 
 @code {
@@ -104,53 +140,92 @@
     private int newRoundA;
     private int newRoundB;
     private Round editingRound;
-    private Round originalRound;
+    private int editingRoundA;
+    private int editingRoundB;
+    private Round roundToDelete;
+    private bool showDeleteConfirm = false;
+    private bool loading = true;
+    private bool loadError = false;
+    private string errorMessage = "";
 
     protected override async Task OnInitializedAsync()
     {
+        Console.WriteLine($"GameScreen initializing with Id: {Id}");
         await LoadGame();
     }
 
     private async Task LoadGame()
     {
-        game = await DbService.GetGameAsync(Id) ?? new Game();
+        try
+        {
+            loading = true;
+            loadError = false;
+            errorMessage = "";
+
+            Console.WriteLine($"Loading game with Id: {Id}");
+            var loadedGame = await DbService.GetGameAsync(Id);
+
+            if (loadedGame != null)
+            {
+                game = loadedGame;
+                Console.WriteLine($"Game loaded: {game.GroupA} vs {game.GroupB}, Rounds: {game.Rounds.Count}");
+            }
+            else
+            {
+                loadError = true;
+                errorMessage = $"Game with ID {Id} not found";
+                Console.WriteLine("Game not found");
+            }
+        }
+        catch (Exception ex)
+        {
+            loadError = true;
+            errorMessage = ex.Message;
+            Console.WriteLine($"Error loading game: {ex}");
+        }
+        finally
+        {
+            loading = false;
+        }
     }
 
     private async Task AddRound()
     {
         if (game.Rounds.Count >= Game.MaxRounds) return;
 
-        var round = new Round
+        try
         {
-            RoundNumber = game.Rounds.Count + 1,
-            GroupAPoints = Math.Min(newRoundA, Game.MaxPointsPerRound),
-            GroupBPoints = Math.Min(newRoundB, Game.MaxPointsPerRound)
-        };
+            var round = new Round
+            {
+                GameId = game.Id,
+                RoundNumber = game.Rounds.Count + 1,
+                GroupAPoints = Math.Min(newRoundA, Game.MaxPointsPerRound),
+                GroupBPoints = Math.Min(newRoundB, Game.MaxPointsPerRound)
+            };
 
-        game.Rounds.Add(round);
-        await DbService.SaveGameAsync(game);
+            game.Rounds.Add(round);
+            await DbService.SaveGameAsync(game);
 
-        newRoundA = 0;
-        newRoundB = 0;
+            newRoundA = 0;
+            newRoundB = 0;
 
-// Check if this was the last round
-        if (game.Rounds.Count >= Game.MaxRounds)
+            // Check if this was the last round
+            if (game.Rounds.Count >= Game.MaxRounds)
+            {
+                await FinishGame();
+            }
+        }
+        catch (Exception ex)
         {
-            await FinishGame();
+            Console.WriteLine($"Error adding round: {ex}");
         }
     }
 
     private void EditRound(Round round)
     {
-        originalRound = round;
-        editingRound = new Round
-        {
-            Id = round.Id,
-            GameId = round.GameId,
-            RoundNumber = round.RoundNumber,
-            GroupAPoints = round.GroupAPoints,
-            GroupBPoints = round.GroupBPoints
-        };
+        editingRound = round;
+        editingRoundA = round.GroupAPoints;
+        editingRoundB = round.GroupBPoints;
     }
 
     private void CancelEdit()
@@ -162,13 +237,65 @@
     {
         if (editingRound != null)
         {
-            originalRound.GroupAPoints = editingRound.GroupAPoints;
-            originalRound.GroupBPoints = editingRound.GroupBPoints;
+            try
+            {
+                // Apply edits to the round
+                editingRound.GroupAPoints = Math.Min(editingRoundA, Game.MaxPointsPerRound);
+                editingRound.GroupBPoints = Math.Min(editingRoundB, Game.MaxPointsPerRound);
 
-            await DbService.UpdateRoundAsync(originalRound);
-            editingRound = null;
+                await DbService.UpdateRoundAsync(editingRound);
+                editingRound = null;
 
-            await LoadGame();
+                await LoadGame();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error saving round edit: {ex}");
+            }
+        }
+    }
+
+    private void DeleteRound(Round round)
+    {
+        roundToDelete = round;
+        showDeleteConfirm = true;
+    }
+
+    private void CancelDelete()
+    {
+        roundToDelete = null;
+        showDeleteConfirm = false;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (roundToDelete != null)
+        {
+            try
+            {
+                // Remove from local collection
+                game.Rounds.Remove(roundToDelete);
+
+                // Update round numbers for all subsequent rounds
+                int index = 1;
+                foreach (var r in game.Rounds.OrderBy(r => r.RoundNumber))
+                {
+                    r.RoundNumber = index++;
+                }
+
+                // Save to database
+                await DbService.DeleteRoundAsync(roundToDelete.Id);
+                await DbService.SaveGameAsync(game);
+
+                roundToDelete = null;
+                showDeleteConfirm = false;
+
+                await LoadGame();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error deleting round: {ex}");
+            }
         }
     }
 

@@ -23,20 +23,24 @@
         </div>
     </div>
 
-    <div class="winner-announcement contrast-text">
-        @if (game.GroupATotal > game.GroupBTotal)
-        {
-            <h2>@game.GroupA Wins!</h2>
-        }
-        else if (game.GroupBTotal > game.GroupATotal)
-        {
-            <h2>@game.GroupB Wins!</h2>
-        }
-        else
-        {
-            <h2>It's a Tie!</h2>
-        }
-    </div>
+    @if (game.GroupATotal > game.GroupBTotal)
+    {
+        <div class="winner-announcement">
+            <h2 class="winner-text">@game.GroupA Wins!</h2>
+        </div>
+    }
+    else if (game.GroupBTotal > game.GroupATotal)
+    {
+        <div class="winner-announcement">
+            <h2 class="winner-text">@game.GroupB Wins!</h2>
+        </div>
+    }
+    else
+    {
+        <div class="winner-announcement">
+            <h2 class="winner-text">It's a Tie!</h2>
+        </div>
+    }
 
     <div class="round-summary">
         <h3>Round Summary</h3>
@@ -86,7 +90,7 @@
 
     private void NewGame()
     {
-        Navigation.NavigateTo("/newgame");
+        Navigation.NavigateTo("/newgame", forceLoad: true);
     }
 
 }

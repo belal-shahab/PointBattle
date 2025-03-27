@@ -66,40 +66,85 @@ public class DatabaseService
     public async Task<int> SaveGameAsync(Game game)
     {
         await InitializeAsync();
-        if (game.Id != 0)
+
+        try
         {
-            await Database.UpdateAsync(game);
-            foreach (var round in game.Rounds)
+            if (game.Id != 0)
             {
-                if (round.Id != 0)
-                    await Database.UpdateAsync(round);
-                else
+                // Updating existing game
+                await Database.UpdateAsync(game);
+
+                foreach (var round in game.Rounds)
                 {
-                    round.GameId = game.Id;
-                    await Database.InsertAsync(round);
+                    if (round.Id != 0)
+                        await Database.UpdateAsync(round);
+                    else
+                    {
+                        round.GameId = game.Id;
+                        await Database.InsertAsync(round);
+                    }
                 }
-            }
 
-            return game.Id;
-        }
-        else
-        {
-            var id = await Database.InsertAsync(game);
-            foreach (var round in game.Rounds)
+                Console.WriteLine($"Updated game with ID: {game.Id}");
+                return game.Id;
+            }
+            else
             {
-                round.GameId = id;
-                await Database.InsertAsync(round);
-            }
+                // Force ID to be 0 for a new game
+                game.Id = 0;
 
-            return id;
+                // Create a completely new game
+                await Database.InsertAsync(game);
+
+                Console.WriteLine($"Created new game with ID: {game.Id}");
+
+                // No rounds yet for a brand new game
+                return game.Id;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in SaveGameAsync: {ex}");
+            throw;
         }
     }
-
-    public async Task<int> DeleteGameAsync(Game game)
+    public async Task DeleteGameAsync(int gameId)
     {
         await InitializeAsync();
-        await Database.Table<Round>().Where(r => r.GameId == game.Id).DeleteAsync();
-        return await Database.DeleteAsync(game);
+        try
+        {
+            Console.WriteLine($"Deleting game with ID: {gameId}");
+
+            // First delete all rounds for this game
+            await Database.Table<Round>().Where(r => r.GameId == gameId).DeleteAsync();
+
+            // Then delete the game itself
+            await Database.DeleteAsync<Game>(gameId);
+
+            Console.WriteLine($"Successfully deleted game with ID: {gameId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting game: {ex.Message}");
+            throw;
+        }
+    }
+   
+
+// Add method to delete a specific round
+    public async Task DeleteRoundAsync(int roundId)
+    {
+        await InitializeAsync();
+        try
+        {
+            Console.WriteLine($"Deleting round with ID: {roundId}");
+            await Database.DeleteAsync<Round>(roundId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error deleting round: {ex}");
+            throw;
+        }
     }
 
     // Add method to delete all games

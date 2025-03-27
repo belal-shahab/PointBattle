@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using MudBlazor.Services;
 using PointBattle.Services;
 
 namespace PointBattle;
@@ -22,7 +23,7 @@ public static class MauiProgram
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
 #endif
-
+        builder.Services.AddMudServices();
         // Register the database service as a singleton
         builder.Services.AddSingleton<DatabaseService>();
 
