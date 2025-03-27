@@ -540,3 +540,222 @@ h1, h2, h3 {
     padding-top: 10px;
     border-top: 1px solid #eee;
 }
+
+/* Add to your app.css */
+.teams-container {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.team-setup {
+    width: 48%;
+    background-color: white;
+    padding: 15px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+.game-title {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.score-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: white;
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 20px;
+}
+
+.team-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+}
+
+.team-name {
+    font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.dashboard-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    width: 30%;
+    box-shadow: var(--box-shadow);
+    text-align: center;
+}
+
+.stat-title {
+    font-weight: bold;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.stat-value {
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.player-stats-container {
+    margin-bottom: 30px;
+}
+
+.player-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.player-stat-card {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    box-shadow: var(--box-shadow);
+    width: calc(33.33% - 15px);
+}
+
+.player-name {
+    font-weight: bold;
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+
+.player-record {
+    margin-bottom: 5px;
+}
+
+.wins {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+
+.losses {
+    color: var(--danger-color);
+    font-weight: bold;
+}
+
+.ties {
+    color: #999;
+    font-weight: bold;
+}
+
+.winner-text {
+    color: var(--primary-color);
+    font-weight: bold;
+}
+.winner-text {
+    margin: 0;
+    color: white !important; /* Make text white */
+    font-size: 32px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+}
+
+/* Today's games styling */
+.today-games {
+    margin-bottom: 30px;
+}
+
+.today-game-card {
+    border-left: 4px solid var(--primary-color);
+}
+
+/* About page styling */
+.about-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.about-content {
+    background-color: white;
+    border-radius: var(--border-radius);
+    padding: 20px;
+    box-shadow: var(--box-shadow);
+    margin-bottom: 20px;
+}
+
+.contact-info, .app-description {
+    margin-top: 20px;
+}
+
+.contact-item {
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border-radius: 5px;
+}
+
+.contact-label {
+    font-weight: bold;
+    display: inline-block;
+    width: 80px;
+}
+
+.contact-value {
+    color: #555;
+}
+
+.winner-announcement {
+    text-align: center;
+    margin: 30px 0;
+    padding: 20px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+/* Add to app.css - this targets just the winner text in game cards */
+.game-card .winner-text {
+    color: #1e88e5 !important; /* Blue color */
+    font-weight: bold;
+    text-shadow: none;
+}
+
+/* Add to app.css */
+.today-games .game-card {
+    border-left: 4px solid var(--primary-color);
+    margin-bottom: 15px;
+    transition: transform 0.2s;
+}
+
+.today-games .game-card:hover {
+    transform: translateX(5px);
+}
+
+.today-games .game-teams {
+    font-size: 18px;
+    font-weight: bold;
+    margin: 5px 0;
+}
+
+.today-games .game-score {
+    font-size: 28px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.today-games .winner-text {
+    font-size: 16px;
+    padding: 5px 10px;
+    border-radius: 4px;
+    display: inline-block;
+    background-color: #f5f5f5;
+}

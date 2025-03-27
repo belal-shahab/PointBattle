@@ -31,7 +31,32 @@ public class DatabaseService
             throw;
         }
     }
-
+    public async Task<List<string>> GetAllPlayerNamesAsync()
+    {
+        await InitializeAsync();
+    
+        var games = await GetGamesAsync();
+        var names = new HashSet<string>();
+    
+        foreach (var game in games)
+        {
+            if (!string.IsNullOrEmpty(game.GroupA))
+                names.Add(game.GroupA);
+            
+            if (!string.IsNullOrEmpty(game.GroupAMember2))
+                names.Add(game.GroupAMember2);
+            
+            if (!string.IsNullOrEmpty(game.GroupB))
+                names.Add(game.GroupB);
+            
+            if (!string.IsNullOrEmpty(game.GroupBMember2))
+                names.Add(game.GroupBMember2);
+        }
+    
+        return names.Where(n => !string.IsNullOrEmpty(n))
+            .OrderBy(n => n)
+            .ToList();
+    }
     public async Task<List<Game>> GetGamesAsync()
     {
         await InitializeAsync();

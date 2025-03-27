@@ -21,14 +21,25 @@
     else
     {
         <div class="header">
-            <h2>@game.GroupA vs @game.GroupB</h2>
-            <div class="score-display">
-                <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
-                    @game.GroupATotal
+            <h2 class="game-title">Game in Progress</h2>
+
+            <div class="score-container">
+                <div class="team-score">
+                    <div class="team-name">@game.GroupAFullName</div>
+                    <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
+                        @game.GroupATotal
+                    </div>
                 </div>
-                <div class="vs">VS</div>
-                <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
-                    @game.GroupBTotal
+
+                <div class="vs-container">
+                    <div class="vs">VS</div>
+                </div>
+
+                <div class="team-score">
+                    <div class="team-name">@game.GroupBFullName</div>
+                    <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
+                        @game.GroupBTotal
+                    </div>
                 </div>
             </div>
 
@@ -112,19 +123,19 @@
             </div>
         }
 
-       // @if (showDeleteConfirm)
-       // {
-       //     <div class="modal-overlay">
-       //         <div class="modal">
-       //             <h3>Confirm Delete</h3>
-       //             <p>Are you sure you want to delete this round?</p>
-       //             <div class="modal-actions">
-       //                 <button class="btn secondary" @onclick="CancelDelete">Cancel</button>
-       //                 <button class="btn danger" @onclick="ConfirmDelete">Delete</button>
-       //             </div>
-       //         </div>
-       //     </div>
-       // }
+        // @if (showDeleteConfirm)
+        // {
+        //     <div class="modal-overlay">
+        //         <div class="modal">
+        //             <h3>Confirm Delete</h3>
+        //             <p>Are you sure you want to delete this round?</p>
+        //             <div class="modal-actions">
+        //                 <button class="btn secondary" @onclick="CancelDelete">Cancel</button>
+        //                 <button class="btn danger" @onclick="ConfirmDelete">Delete</button>
+        //             </div>
+        //         </div>
+        //     </div>
+        // }
 
         <div class="actions">
             <button class="btn secondary" @onclick="BackToHome">Home</button>

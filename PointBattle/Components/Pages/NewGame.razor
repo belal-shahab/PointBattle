@@ -7,15 +7,38 @@
 <div class="container">
     <h2>New Game</h2>
 
-    <div class="form-group">
-        <label>Group A Name:</label>
-        <input @bind="groupAName" placeholder="Group A" />
+    <div class="teams-container">
+        <div class="team-setup">
+            <h3>Team 1</h3>
+            <div class="form-group">
+                <label>Player 1:</label>
+                <input list="player-names" @bind="groupAName" placeholder="Player Name"/>
+            </div>
+            <div class="form-group">
+                <label>Player 2 (optional):</label>
+                <input list="player-names" @bind="groupAMember2" placeholder="Player Name"/>
+            </div>
+        </div>
+
+        <div class="team-setup">
+            <h3>Team 2</h3>
+            <div class="form-group">
+                <label>Player 1:</label>
+                <input list="player-names" @bind="groupBName" placeholder="Player Name"/>
+            </div>
+            <div class="form-group">
+                <label>Player 2 (optional):</label>
+                <input list="player-names" @bind="groupBMember2" placeholder="Player Name"/>
+            </div>
+        </div>
     </div>
 
-    <div class="form-group">
-        <label>Group B Name:</label>
-        <input @bind="groupBName" placeholder="Group B" />
-    </div>
+    <datalist id="player-names">
+        @foreach (var name in playerNames)
+        {
+            <option value="@name"/>
+        }
+    </datalist>
 
     <div class="button-container">
         <button class="btn secondary" @onclick="Cancel">Cancel</button>
@@ -24,9 +47,17 @@
 </div>
 
 @code {
-    private string groupAName = "Group A";
-    private string groupBName = "Group B";
+    private string groupAName = "";
+    private string groupAMember2 = "";
+    private string groupBName = "";
+    private string groupBMember2 = "";
+    private List<string> playerNames = new List<string>();
 
+    protected override async Task OnInitializedAsync()
+    {
+        playerNames = await DbService.GetAllPlayerNamesAsync();
+    }
+    
     private void Cancel()
     {
         Navigation.NavigateTo("/");
@@ -34,18 +65,20 @@
 
     private async Task StartGame()
     {
-        // Create a completely brand new game
         var game = new Game
-            {
-                GroupA = !string.IsNullOrWhiteSpace(groupAName) ? groupAName : "Group A",
-                GroupB = !string.IsNullOrWhiteSpace(groupBName) ? groupBName : "Group B",
-                Date = DateTime.Now,
-                IsCompleted = false,
-                Rounds = new List<Round>()
-            };
+        {
+            GroupA = !string.IsNullOrWhiteSpace(groupAName) ? groupAName : "Player 1",
+            GroupAMember2 = groupAMember2,
+            GroupB = !string.IsNullOrWhiteSpace(groupBName) ? groupBName : "Player 1",
+            GroupBMember2 = groupBMember2,
+            Date = DateTime.Now,
+            IsCompleted = false,
+            Rounds = new List<Round>()
+        };
 
         // Save to database
         var id = await DbService.SaveGameAsync(game);
+        
 
         // Now if we have a valid ID, navigate to the game screen
         if (id > 0)
@@ -58,4 +91,5 @@
             Console.WriteLine("Error: Failed to create new game");
         }
     }
+
 }

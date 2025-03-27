@@ -8,7 +8,11 @@ public class Game
     [PrimaryKey, AutoIncrement]
     public int Id { get; set; }
     public string GroupA { get; set; } = "Group A";
+    public string GroupAMember2 { get; set; } = "";
+
     public string GroupB { get; set; } = "Group B";
+    public string GroupBMember2 { get; set; } = "";
+
     public DateTime Date { get; set; } = DateTime.Now;
     public string Winner { get; set; } = "";
     public bool IsCompleted { get; set; } = false;
@@ -21,6 +25,14 @@ public class Game
     
     [Ignore]
     public int GroupBTotal => Rounds.Sum(r => r.GroupBPoints);
+    
+    [Ignore]
+    public string GroupAFullName => string.IsNullOrEmpty(GroupAMember2) ? 
+        GroupA : $"{GroupA} & {GroupAMember2}";
+        
+    [Ignore]
+    public string GroupBFullName => string.IsNullOrEmpty(GroupBMember2) ? 
+        GroupB : $"{GroupB} & {GroupBMember2}";
     
     public const int MaxRounds = 8;  // Set maximum rounds to 8
     
