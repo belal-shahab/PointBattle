@@ -759,3 +759,175 @@ h1, h2, h3 {
     display: inline-block;
     background-color: #f5f5f5;
 }
+.point-difference {
+    text-align: center;
+    font-size: 14px;
+    margin: 8px 0;
+    color: #555;
+    font-weight: bold;
+}
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+    /* General container adjustments */
+    .container, .game-container, .result-container, .history-container, .main-container {
+        padding: 12px;
+        width: 100%;
+    }
+
+    /* Header adjustments */
+    h1 { font-size: 28px; }
+    h2 { font-size: 24px; }
+    h3 { font-size: 20px; }
+
+    /* Game header and score container */
+    .game-title {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
+
+    .score-container {
+        padding: 12px;
+    }
+
+    .team-name {
+        font-size: 14px;
+    }
+
+    .score {
+        font-size: 32px;
+        padding: 10px 15px;
+    }
+
+    .vs {
+        font-size: 14px;
+        margin: 0 8px;
+    }
+
+    /* Button adjustments */
+    .btn {
+        padding: 10px 15px;
+        font-size: 14px;
+        margin: 5px 3px;
+        min-height: 44px; /* Better touch target */
+    }
+
+    .actions {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Round styling */
+    .round {
+        padding: 10px;
+    }
+
+    .round-header {
+        margin-bottom: 8px;
+    }
+
+    .round-score {
+        font-size: 20px;
+    }
+
+    .point-difference {
+        font-size: 12px;
+        padding: 5px 0;
+        margin: 5px 0;
+        border-top: 1px dotted #eee;
+        border-bottom: 1px dotted #eee;
+    }
+
+    /* New round form */
+    .new-round {
+        padding: 15px;
+    }
+
+    .input-group {
+        margin-bottom: 10px;
+    }
+
+    .input-group input {
+        padding: 8px;
+        font-size: 14px;
+    }
+
+    /* Alert messages */
+    .alert {
+        padding: 12px;
+        font-size: 14px;
+        margin: 10px 0;
+    }
+
+    /* Modal dialogs */
+    .modal {
+        width: 95%;
+        padding: 15px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+}
+
+/* Extra small devices (phones) */
+@media (max-width: 480px) {
+    /* Even smaller screens need more adjustments */
+    .score {
+        font-size: 26px;
+        padding: 8px 10px;
+    }
+
+    .round-actions {
+        justify-content: center;
+    }
+
+    .delete-button {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+
+    .point-difference {
+        font-size: 11px;
+        line-height: 1.3;
+    }
+
+    .winner-text {
+        font-size: 22px;
+    }
+
+    /* Stack any multi-column layouts */
+    .dashboard-stats {
+        flex-direction: column;
+    }
+
+    .stat-card {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    .player-stat-card {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    /* Fix teams container */
+    .teams-container {
+        flex-direction: column;
+    }
+
+    .team-setup {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* Ensure proper touch targets for all interactive elements */
+@media (pointer: coarse) {
+    .btn, .delete-button, .edit-button, input[type="number"] {
+        min-height: 44px;
+    }
+
+    .round-actions button {
+        min-width: 44px;
+    }
+}

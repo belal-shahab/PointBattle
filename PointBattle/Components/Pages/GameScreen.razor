@@ -68,13 +68,32 @@
 
         <div class="rounds-container">
             <h3>Rounds</h3>
+            @{
+                int cumulativeGroupA = 0;
+                int cumulativeGroupB = 0;
+            }
             @foreach (var round in game.Rounds)
             {
+                cumulativeGroupA += round.GroupAPoints;
+                cumulativeGroupB += round.GroupBPoints;
+                int difference = cumulativeGroupA - cumulativeGroupB;
+                string leadingTeam = difference > 0 ? game.GroupAFullName : game.GroupBFullName;
+        
                 <div class="round">
                     <div class="round-header">Round @round.RoundNumber</div>
                     <div class="round-scores">
                         <div class="round-score">@round.GroupAPoints</div>
                         <div class="round-score">@round.GroupBPoints</div>
+                    </div>
+                    <div class="point-difference">
+                        @if (difference == 0)
+                        {
+                            <span>Both teams are tied</span>
+                        }
+                        else
+                        {
+                            <span>@leadingTeam have @Math.Abs(difference) point@(Math.Abs(difference) != 1 ? "s" : "") more</span>
+                        }
                     </div>
                     <div class="round-actions">
                         <!--<button class="edit-button" @onclick="() => EditRound(round)">Edit</button>-->
