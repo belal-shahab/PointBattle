@@ -1,0 +1,115 @@
+@page "/allgames"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="all-games-container">
+    <div class="page-header">
+        <button class="back-button" @onclick="BackToHistory">
+            <span>←</span> Back to History
+        </button>
+        <h2>All Games</h2>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading">Loading games...</div>
+    }
+    else if (games.Count == 0)
+    {
+        <p>No games found.</p>
+    }
+    else
+    {
+        <div class="game-filter">
+            <input type="text" placeholder="Search by player name" @bind="searchText" @bind:event="oninput" @onkeyup="FilterGames" />
+        </div>
+
+        <div class="games-list">
+            @foreach (var game in filteredGames)
+            {
+                <div class="game-card">
+                    <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
+                        <div class="game-date">@game.Date.ToString("MMM d, yyyy")</div>
+                        <div class="game-teams">@game.GroupAFullName vs @game.GroupBFullName</div>
+                        <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
+                        <div class="game-winner">
+                            @if (game.GroupATotal > game.GroupBTotal)
+                            {
+                                <span class="winner-text">@game.GroupAFullName wins!</span>
+                            }
+                            else if (game.GroupBTotal > game.GroupATotal)
+                            {
+                                <span class="winner-text">@game.GroupBFullName wins!</span>
+                            }
+                            else
+                            {
+                                <span>Tie game</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="game-card-actions">
+                        <button class="delete-button" @onclick="() => DeleteGame(game.Id)">Delete</button>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>
+
+@code {
+    private List<Game> games = new List<Game>();
+    private List<Game> filteredGames = new List<Game>();
+    private string searchText = "";
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        await LoadGames();
+        loading = false;
+    }
+
+    private async Task LoadGames()
+    {
+        games = await DbService.GetGamesAsync();
+        FilterGames();
+    }
+
+    private void FilterGames()
+    {
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredGames = games.OrderByDescending(g => g.Date).ToList();
+        }
+        else
+        {
+            filteredGames = games
+                .Where(g => 
+                    (g.GroupA?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (g.GroupAMember2?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (g.GroupB?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (g.GroupBMember2?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
+                .OrderByDescending(g => g.Date)
+                .ToList();
+        }
+    }
+
+    private void ViewGame(int id)
+    {
+        Navigation.NavigateTo($"/gameresult/{id}");
+    }
+
+    private async void DeleteGame(int id)
+    {
+        await DbService.DeleteGameAsync(id);
+        await LoadGames();
+        StateHasChanged();
+    }
+
+    private void BackToHistory()
+    {
+        Navigation.NavigateTo("/history");
+    }
+}

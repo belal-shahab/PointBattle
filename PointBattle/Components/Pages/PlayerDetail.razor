@@ -1,0 +1,352 @@
+@page "/player/{PlayerName}"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="player-profile-container">
+    <div class="player-header">
+        <button class="back-button" @onclick="BackToHistory">
+            <span>←</span> Back to History
+        </button>
+        <h2>@PlayerName's Profile</h2>
+    </div>
+
+    @if (loading)
+    {
+        <div class="loading">Loading player data...</div>
+    }
+    else if (playerStats == null)
+    {
+        <div class="alert alert-danger">Player not found</div>
+    }
+    else
+    {
+        <div class="player-summary-card">
+            <div class="player-stat-row">
+                <div class="player-stat-box">
+                    <div class="stat-label">Games</div>
+                    <div class="stat-value">@(playerStats.Wins + playerStats.Losses + playerStats.Ties)</div>
+                </div>
+                <div class="player-stat-box">
+                    <div class="stat-label">Wins</div>
+                    <div class="stat-value wins">@playerStats.Wins</div>
+                </div>
+                <div class="player-stat-box">
+                    <div class="stat-label">Losses</div>
+                    <div class="stat-value losses">@playerStats.Losses</div>
+                </div>
+                <div class="player-stat-box">
+                    <div class="stat-label">Ties</div>
+                    <div class="stat-value ties">@playerStats.Ties</div>
+                </div>
+                <div class="player-stat-box">
+                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-value">@winRate%</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="partnerships-container">
+            <h3>Partnerships</h3>
+            
+            <div class="partnership-section">
+                <h4>Won with teammates:</h4>
+                @if (partnerships.WonWith.Count > 0)
+                {
+                    <div class="partnerships-list">
+                        @foreach (var partner in partnerships.WonWith)
+                        {
+                            <div class="partnership-card win-card">
+                                <div class="partnership-details">
+                                    <div class="partner-name">@partner.Name</div>
+                                    <div class="partnership-count">@partner.Count wins together</div>
+                                </div>
+                                <div class="partnership-opponents">
+                                    @foreach (var opponent in partner.Opponents)
+                                    {
+                                        <div class="opponent-item">
+                                            <span>vs @opponent.Names</span>
+                                            <span class="opponent-count">@opponent.Count time@(opponent.Count != 1 ? "s" : "")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">No wins with teammates yet</div>
+                }
+            </div>
+            
+            <div class="partnership-section">
+                <h4>Lost with teammates:</h4>
+                @if (partnerships.LostWith.Count > 0)
+                {
+                    <div class="partnerships-list">
+                        @foreach (var partner in partnerships.LostWith)
+                        {
+                            <div class="partnership-card loss-card">
+                                <div class="partnership-details">
+                                    <div class="partner-name">@partner.Name</div>
+                                    <div class="partnership-count">@partner.Count losses together</div>
+                                </div>
+                                <div class="partnership-opponents">
+                                    @foreach (var opponent in partner.Opponents)
+                                    {
+                                        <div class="opponent-item">
+                                            <span>vs @opponent.Names</span>
+                                            <span class="opponent-count">@opponent.Count time@(opponent.Count != 1 ? "s" : "")</span>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-state">No losses with teammates yet</div>
+                }
+            </div>
+        </div>
+
+        <div class="recent-games">
+            <h3>Recent Games</h3>
+            <div class="game-cards-container">
+                @foreach (var game in playerGames)
+                {
+                    <div class="game-detail-card" @onclick="() => ViewGame(game.Id)">
+                        <div class="game-date">@game.Date.ToString("MMM d, yyyy")</div>
+                        <div class="game-teams">
+                            <div class="team @(IsPlayerInTeamA(game) ? "player-team" : "")">
+                                @game.GroupAFullName
+                            </div>
+                            <div class="vs">vs</div>
+                            <div class="team @(!IsPlayerInTeamA(game) ? "player-team" : "")">
+                                @game.GroupBFullName
+                            </div>
+                        </div>
+                        <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
+                        <div class="game-result @GetResultClass(game)">
+                            @GetResultText(game)
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public string PlayerName { get; set; }
+    
+    private List<Game> allGames = new List<Game>();
+    private List<Game> playerGames = new List<Game>();
+    private PlayerStat playerStats;
+    private PlayerPartnerships partnerships = new PlayerPartnerships();
+    private string winRate = "0.0";
+    private bool loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        await LoadData();
+        loading = false;
+    }
+
+    private async Task LoadData()
+    {
+        allGames = await DbService.GetGamesAsync();
+        
+        // Get player games
+        playerGames = allGames.Where(g => 
+            g.GroupA == PlayerName || 
+            g.GroupAMember2 == PlayerName || 
+            g.GroupB == PlayerName || 
+            g.GroupBMember2 == PlayerName)
+            .OrderByDescending(g => g.Date)
+            .ToList();
+        
+        // Calculate player stats
+        playerStats = CalculatePlayerStats();
+        winRate = CalculateWinRate().ToString("0.0");
+        
+        // Calculate partnerships
+        partnerships = CalculatePartnerships();
+    }
+
+    private PlayerStat CalculatePlayerStats()
+    {
+        var stats = new PlayerStat { Name = PlayerName };
+        
+        foreach (var game in playerGames)
+        {
+            bool inGroupA = game.GroupA == PlayerName || game.GroupAMember2 == PlayerName;
+            int playerTeamScore = inGroupA ? game.GroupATotal : game.GroupBTotal;
+            int opponentTeamScore = inGroupA ? game.GroupBTotal : game.GroupATotal;
+            
+            stats.TotalPoints += playerTeamScore;
+            
+            if (playerTeamScore > opponentTeamScore)
+                stats.Wins++;
+            else if (playerTeamScore < opponentTeamScore)
+                stats.Losses++;
+            else
+                stats.Ties++;
+        }
+        
+        return stats;
+    }
+    
+    private double CalculateWinRate()
+    {
+        int totalGames = playerStats.Wins + playerStats.Losses + playerStats.Ties;
+        if (totalGames == 0) return 0;
+        return (playerStats.Wins * 100.0) / totalGames;
+    }
+    
+    private PlayerPartnerships CalculatePartnerships()
+    {
+        var partnerships = new PlayerPartnerships();
+        
+        foreach (var game in playerGames)
+        {
+            bool inGroupA = game.GroupA == PlayerName || game.GroupAMember2 == PlayerName;
+            bool isWin = (inGroupA && game.GroupATotal > game.GroupBTotal) || 
+                         (!inGroupA && game.GroupBTotal > game.GroupATotal);
+            bool isTie = game.GroupATotal == game.GroupBTotal;
+            
+            if (isTie) continue; // Skip ties for partnership analysis
+            
+            // Identify partner (if any)
+            string partner = null;
+            if (inGroupA)
+            {
+                if (game.GroupA == PlayerName && !string.IsNullOrEmpty(game.GroupAMember2))
+                    partner = game.GroupAMember2;
+                else if (game.GroupAMember2 == PlayerName)
+                    partner = game.GroupA;
+            }
+            else
+            {
+                if (game.GroupB == PlayerName && !string.IsNullOrEmpty(game.GroupBMember2))
+                    partner = game.GroupBMember2;
+                else if (game.GroupBMember2 == PlayerName)
+                    partner = game.GroupB;
+            }
+            
+            // Identify opponents
+            string opponents = inGroupA ? game.GroupBFullName : game.GroupAFullName;
+            
+            // Record partnership
+            if (partner != null)
+            {
+                if (isWin)
+                {
+                    AddPartnership(partnerships.WonWith, partner, opponents);
+                }
+                else
+                {
+                    AddPartnership(partnerships.LostWith, partner, opponents);
+                }
+            }
+        }
+        
+        return partnerships;
+    }
+    
+    private void AddPartnership(List<PartnershipDetail> list, string partner, string opponents)
+    {
+        var partnership = list.FirstOrDefault(p => p.Name == partner);
+        if (partnership == null)
+        {
+            partnership = new PartnershipDetail { Name = partner };
+            list.Add(partnership);
+        }
+        
+        partnership.Count++;
+        
+        var opponent = partnership.Opponents.FirstOrDefault(o => o.Names == opponents);
+        if (opponent == null)
+        {
+            opponent = new OpponentDetail { Names = opponents };
+            partnership.Opponents.Add(opponent);
+        }
+        
+        opponent.Count++;
+    }
+    
+    private bool IsPlayerInTeamA(Game game)
+    {
+        return game.GroupA == PlayerName || game.GroupAMember2 == PlayerName;
+    }
+    
+    private string GetResultClass(Game game)
+    {
+        bool inGroupA = IsPlayerInTeamA(game);
+        if (game.GroupATotal == game.GroupBTotal)
+            return "tie-result";
+        else if ((inGroupA && game.GroupATotal > game.GroupBTotal) || 
+                (!inGroupA && game.GroupBTotal > game.GroupATotal))
+            return "win-result";
+        else
+            return "loss-result";
+    }
+    
+    private string GetResultText(Game game)
+    {
+        bool inGroupA = IsPlayerInTeamA(game);
+        int playerTeamScore = inGroupA ? game.GroupATotal : game.GroupBTotal;
+        int opponentTeamScore = inGroupA ? game.GroupBTotal : game.GroupATotal;
+        int pointDiff = Math.Abs(playerTeamScore - opponentTeamScore);
+        
+        if (playerTeamScore == opponentTeamScore)
+            return "Tie game";
+        else if (playerTeamScore > opponentTeamScore)
+            return $"Won by {pointDiff} points";
+        else
+            return $"Lost by {pointDiff} points";
+    }
+    
+    private void ViewGame(int id)
+    {
+        Navigation.NavigateTo($"/gameresult/{id}");
+    }
+    
+    private void BackToHistory()
+    {
+        Navigation.NavigateTo("/history");
+    }
+    
+    // Models for partnerships analysis
+    private class PlayerPartnerships
+    {
+        public List<PartnershipDetail> WonWith { get; set; } = new List<PartnershipDetail>();
+        public List<PartnershipDetail> LostWith { get; set; } = new List<PartnershipDetail>();
+    }
+    
+    private class PartnershipDetail
+    {
+        public string Name { get; set; }
+        public int Count { get; set; }
+        public List<OpponentDetail> Opponents { get; set; } = new List<OpponentDetail>();
+    }
+    
+    private class OpponentDetail
+    {
+        public string Names { get; set; }
+        public int Count { get; set; }
+    }
+    
+    private class PlayerStat
+    {
+        public string Name { get; set; }
+        public int Wins { get; set; }
+        public int Losses { get; set; }
+        public int Ties { get; set; }
+        public int TotalPoints { get; set; }
+    }
+}

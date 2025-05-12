@@ -5,41 +5,6 @@
 @inject NavigationManager Navigation
 
 <div class="history-container">
-    <h3>Today's Games</h3>
-    <div class="today-games">
-        @if (todayGames.Count > 0)
-        {
-            <div class="games-list">
-                @foreach (var game in todayGames)
-                {
-                    <div class="game-card today-game-card">
-                        <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
-                            <div class="game-teams">@game.GroupAFullName vs @game.GroupBFullName</div>
-                            <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
-                            <div class="game-winner">
-                                @if (game.GroupATotal > game.GroupBTotal)
-                                {
-                                    <span class="winner-text">@game.GroupAFullName wins!</span>
-                                }
-                                else if (game.GroupBTotal > game.GroupATotal)
-                                {
-                                    <span class="winner-text">@game.GroupBFullName wins!</span>
-                                }
-                                else
-                                {
-                                    <span>Tie game</span>
-                                }
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        }
-        else
-        {
-            <p>No games played today.</p>
-        }
-    </div>
     <h2>Game Dashboard</h2>
 
     @if (games.Count == 0)
@@ -63,12 +28,50 @@
             </div>
         </div>
 
+        <h3>Today's Games</h3>
+        <div class="today-games">
+            @if (todayGames.Count > 0)
+            {
+                <div class="games-list">
+                    @foreach (var game in todayGames)
+                    {
+                        <div class="game-card today-game-card">
+                            <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
+                                <div class="game-date">@game.Date.ToString("h:mm tt")</div>
+                                <div class="game-teams">@game.GroupAFullName vs @game.GroupBFullName</div>
+                                <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
+                                <div class="game-winner">
+                                    @if (game.GroupATotal > game.GroupBTotal)
+                                    {
+                                        <span class="winner-text">@game.GroupAFullName wins!</span>
+                                    }
+                                    else if (game.GroupBTotal > game.GroupATotal)
+                                    {
+                                        <span class="winner-text">@game.GroupBFullName wins!</span>
+                                    }
+                                    else
+                                    {
+                                        <span>Tie game</span>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p>No games played today.</p>
+            }
+        </div>
+
         <div class="player-stats-container">
             <h3>Player Statistics</h3>
+            <p>Click on a player to view their detailed profile</p>
             <div class="player-stats">
                 @foreach (var player in GetPlayerStats())
                 {
-                    <div class="player-stat-card">
+                    <div class="player-stat-card" @onclick="() => ViewPlayerDetails(player.Name)">
                         <div class="player-name">@player.Name</div>
                         <div class="player-record">
                             <span class="wins">@player.Wins W</span> /
@@ -76,6 +79,8 @@
                             <span class="ties">@player.Ties T</span>
                         </div>
                         <div class="player-points">Total Points: @player.TotalPoints</div>
+                        <div class="player-winrate">Win Rate: @(CalculateWinRate(player.Wins, player.Losses, player.Ties).ToString("0.0"))%</div>
+                        <div class="view-profile">View Profile →</div>
                     </div>
                 }
             </div>
@@ -83,7 +88,7 @@
 
         <h3>Recent Games</h3>
         <div class="games-list">
-            @foreach (var game in games.OrderByDescending(g => g.Date))
+            @foreach (var game in games.OrderByDescending(g => g.Date).Take(5))
             {
                 <div class="game-card">
                     <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
@@ -111,6 +116,13 @@
                 </div>
             }
         </div>
+        
+        @if (games.Count > 5)
+        {
+            <div class="see-all-games">
+                <button class="btn secondary" @onclick="ViewAllGames">See All Games</button>
+            </div>
+        }
     }
 
     <div class="button-container">
@@ -120,9 +132,17 @@
 
 @code {
     private List<Game> games = new List<Game>();
-    private int gameIdToDelete = 0;
+    private List<Game> todayGames = new List<Game>();
+    private bool showAllGames = false;
 
-   
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadGames();
+        
+        // Filter today's games
+        todayGames = games.Where(g => g.Date.Date == DateTime.Today).ToList();
+    }
+
     private async Task LoadGames()
     {
         games = await DbService.GetGamesAsync();
@@ -133,10 +153,19 @@
         Navigation.NavigateTo($"/gameresult/{id}");
     }
 
+    private void ViewPlayerDetails(string playerName)
+    {
+        Navigation.NavigateTo($"/player/{Uri.EscapeDataString(playerName)}");
+    }
+
+    private void ViewAllGames()
+    {
+        Navigation.NavigateTo("/allgames");
+    }
+
     private async void DeleteGame(int id)
     {
-        gameIdToDelete = id;
-        await DbService.DeleteGameAsync(gameIdToDelete);
+        await DbService.DeleteGameAsync(id);
         await LoadGames();
         StateHasChanged();
     }
@@ -146,19 +175,18 @@
         Navigation.NavigateTo("/");
     }
 
-// Get player statistics
     private List<PlayerStat> GetPlayerStats()
     {
         var stats = new Dictionary<string, PlayerStat>();
 
         foreach (var game in games)
         {
-// Process Group A
+            // Process Group A
             ProcessPlayer(stats, game.GroupA, game.GroupATotal, game.GroupBTotal);
             if (!string.IsNullOrEmpty(game.GroupAMember2))
                 ProcessPlayer(stats, game.GroupAMember2, game.GroupATotal, game.GroupBTotal);
 
-// Process Group B
+            // Process Group B
             ProcessPlayer(stats, game.GroupB, game.GroupBTotal, game.GroupATotal);
             if (!string.IsNullOrEmpty(game.GroupBMember2))
                 ProcessPlayer(stats, game.GroupBMember2, game.GroupBTotal, game.GroupATotal);
@@ -168,6 +196,13 @@
             .OrderByDescending(p => p.Wins)
             .ThenByDescending(p => p.TotalPoints)
             .ToList();
+    }
+
+    private double CalculateWinRate(int wins, int losses, int ties)
+    {
+        int totalGames = wins + losses + ties;
+        if (totalGames == 0) return 0;
+        return (wins * 100.0) / totalGames;
     }
 
     private void ProcessPlayer(Dictionary<string, PlayerStat> stats, string playerName, int teamPoints, int opponentPoints)
@@ -198,15 +233,4 @@
         public int Ties { get; set; }
         public int TotalPoints { get; set; }
     }
-
-    private List<Game> todayGames = new List<Game>();
-
-    protected override async Task OnInitializedAsync()
-    {
-        await LoadGames();
-
-        // Filter today's games
-        todayGames = games.Where(g => g.Date.Date == DateTime.Today).ToList();
-    }
-
 }
