@@ -26,6 +26,27 @@
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
+    
+    <script>
+        // Add this script for handling input focus and mobile keyboard
+        function setupInputFocus() {
+            // Add event listeners for handling viewport adjustments on mobile
+            window.addEventListener('resize', function() {
+                // This will help adjust the view when keyboard appears/disappears on mobile
+                if (document.activeElement.tagName === 'INPUT') {
+                    setTimeout(() => document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+                }
+            });
+        }
+
+        function scrollToInput(inputId) {
+            // Scroll to ensure input is visible, especially on mobile
+            const inputElement = document.activeElement;
+            if (inputElement) {
+                setTimeout(() => inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+            }
+        }
+    </script>
 
 </body>
 

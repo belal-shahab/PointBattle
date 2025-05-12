@@ -3,6 +3,7 @@
 @using PointBattle.Services
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 
 <div class="game-container">
     @if (loading)
@@ -43,6 +44,26 @@
                 </div>
             </div>
 
+            @{
+                int pointDifference = game.GroupATotal - game.GroupBTotal;
+                string leadingTeam = pointDifference > 0 ? game.GroupAFullName : game.GroupBFullName;
+            }
+
+            @if (pointDifference != 0 && game.Rounds.Count > 0)
+            {
+                <div class="point-difference-display">
+                    <div class="point-difference-text">
+                        @leadingTeam @(pointDifference > 0 ? "leads by" : "leads by") <span class="point-difference-number">@Math.Abs(pointDifference)</span> point@(Math.Abs(pointDifference) != 1 ? "s" : "")
+                    </div>
+                </div>
+            }
+            else if (game.Rounds.Count > 0)
+            {
+                <div class="point-difference-display tie">
+                    <div class="point-difference-text">Teams are tied</div>
+                </div>
+            }
+
             @if (game.Rounds.Count > 0)
             {
                 @if (game.IsGroupAWinConfirmed())
@@ -68,35 +89,16 @@
 
         <div class="rounds-container">
             <h3>Rounds</h3>
-            @{
-                int cumulativeGroupA = 0;
-                int cumulativeGroupB = 0;
-            }
             @foreach (var round in game.Rounds)
             {
-                cumulativeGroupA += round.GroupAPoints;
-                cumulativeGroupB += round.GroupBPoints;
-                int difference = cumulativeGroupA - cumulativeGroupB;
-                string leadingTeam = difference > 0 ? game.GroupAFullName : game.GroupBFullName;
-        
                 <div class="round">
                     <div class="round-header">Round @round.RoundNumber</div>
                     <div class="round-scores">
                         <div class="round-score">@round.GroupAPoints</div>
                         <div class="round-score">@round.GroupBPoints</div>
                     </div>
-                    <div class="point-difference">
-                        @if (difference == 0)
-                        {
-                            <span>Both teams are tied</span>
-                        }
-                        else
-                        {
-                            <span>@leadingTeam have @Math.Abs(difference) point@(Math.Abs(difference) != 1 ? "s" : "") more</span>
-                        }
-                    </div>
                     <div class="round-actions">
-                        <!--<button class="edit-button" @onclick="() => EditRound(round)">Edit</button>-->
+                        <button class="edit-button" @onclick="() => EditRound(round)">Edit</button>
                         <button class="delete-button" @onclick="() => DeleteRound(round)">Delete</button>
                     </div>
                 </div>
@@ -105,16 +107,26 @@
 
         @if (game.Rounds.Count < Game.MaxRounds && !game.IsCompleted)
         {
-            <div class="new-round">
+            <div class="new-round" id="new-round-section">
                 <h3>New Round</h3>
                 <div class="input-group">
                     <label>@game.GroupA</label>
-                    <input type="number" @bind="newRoundA" max="@Game.MaxPointsPerRound"/>
+                    <input type="number" 
+                           value="@newRoundA" 
+                           @onfocus="e => ClearDefaultValue(e, true)"
+                           @onchange="e => newRoundA = int.Parse(e.Value.ToString())"
+                           max="@Game.MaxPointsPerRound"
+                           @ref="teamAInputRef"/>
                     <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
                 </div>
                 <div class="input-group">
                     <label>@game.GroupB</label>
-                    <input type="number" @bind="newRoundB" max="@Game.MaxPointsPerRound"/>
+                    <input type="number" 
+                           value="@newRoundB" 
+                           @onfocus="e => ClearDefaultValue(e, false)" 
+                           @onchange="e => newRoundB = int.Parse(e.Value.ToString())"
+                           max="@Game.MaxPointsPerRound"
+                           @ref="teamBInputRef"/>
                     <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
                 </div>
                 <button class="btn primary" @onclick="AddRound">Add Round</button>
@@ -142,20 +154,6 @@
             </div>
         }
 
-        // @if (showDeleteConfirm)
-        // {
-        //     <div class="modal-overlay">
-        //         <div class="modal">
-        //             <h3>Confirm Delete</h3>
-        //             <p>Are you sure you want to delete this round?</p>
-        //             <div class="modal-actions">
-        //                 <button class="btn secondary" @onclick="CancelDelete">Cancel</button>
-        //                 <button class="btn danger" @onclick="ConfirmDelete">Delete</button>
-        //             </div>
-        //         </div>
-        //     </div>
-        // }
-
         <div class="actions">
             <button class="btn secondary" @onclick="BackToHome">Home</button>
             <button class="btn warning" @onclick="FinishGame">End Game</button>
@@ -177,11 +175,40 @@
     private bool loading = true;
     private bool loadError = false;
     private string errorMessage = "";
+    private ElementReference teamAInputRef;
+    private ElementReference teamBInputRef;
+    private bool teamAInputClicked = false;
+    private bool teamBInputClicked = false;
 
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"GameScreen initializing with Id: {Id}");
         await LoadGame();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("setupInputFocus");
+        }
+    }
+
+    private void ClearDefaultValue(FocusEventArgs e, bool isTeamA)
+    {
+        if (isTeamA && !teamAInputClicked)
+        {
+            newRoundA = 0;
+            teamAInputClicked = true;
+        }
+        else if (!isTeamA && !teamBInputClicked)
+        {
+            newRoundB = 0;
+            teamBInputClicked = true;
+        }
+
+        // Scroll to make sure input stays visible
+        JSRuntime.InvokeVoidAsync("scrollToInput", isTeamA ? "teamAInput" : "teamBInput");
     }
 
     private async Task LoadGame()
@@ -238,6 +265,8 @@
 
             newRoundA = 0;
             newRoundB = 0;
+            teamAInputClicked = false;
+            teamBInputClicked = false;
 
             // Check if this was the last round
             if (game.Rounds.Count >= Game.MaxRounds)
