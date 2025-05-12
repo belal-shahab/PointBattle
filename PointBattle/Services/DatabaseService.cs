@@ -202,4 +202,29 @@ public class DatabaseService
             throw;
         }
     }
+    public async Task SaveGameWithRoundsAsync(Game game)
+    {
+        await InitializeAsync();
+    
+        try
+        {
+            // Update the game record
+            await Database.UpdateAsync(game);
+        
+            // Update each round in the game
+            foreach (var round in game.Rounds)
+            {
+                await Database.ExecuteAsync(
+                    "UPDATE rounds SET GroupAPoints = ?, GroupBPoints = ? WHERE Id = ?",
+                    round.GroupAPoints, round.GroupBPoints, round.Id);
+            }
+        
+            Console.WriteLine($"Successfully updated game {game.Id} with all rounds");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in SaveGameWithRoundsAsync: {ex.Message}");
+            throw;
+        }
+    }
 }

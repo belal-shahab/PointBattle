@@ -50,7 +50,7 @@
                         </div>
                     </div>
                     <div class="game-card-actions">
-                        <button class="edit-button" @onclick="() => EditGame(game)">Edit</button>
+                        <button class="edit-button" @onclick:stopPropagation="true" @onclick="() => NavigateToEditGame(game.Id)">Edit</button>
                         <button class="delete-button" @onclick="() => DeleteGame(game.Id)">Delete</button>
                     </div>
                 </div>
@@ -74,7 +74,10 @@
     {
         gameToEdit = game;
     }
-
+    private void NavigateToEditGame(int gameId)
+    {
+        Navigation.NavigateTo($"/editgame/{gameId}");
+    }
     private void CancelEdit()
     {
         gameToEdit = null;

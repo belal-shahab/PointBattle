@@ -46,13 +46,64 @@
             }
         </datalist>
 
+        <h3>Edit Rounds</h3>
+        <div class="rounds-container">
+            @if (game.Rounds.Count > 0)
+            {
+                <div class="rounds-table">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>Round</th>
+                            <th>@game.GroupA</th>
+                            <th>@game.GroupB</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @for (int i = 0; i < game.Rounds.Count; i++)
+                        {
+                            var index = i;
+                            <tr>
+                                <td>Round @game.Rounds[index].RoundNumber</td>
+                                <td>
+                                    <input type="number" 
+                                           min="0" 
+                                           max="@Game.MaxPointsPerRound" 
+                                           @bind="game.Rounds[index].GroupAPoints" 
+                                           style="width: 80px; text-align: center;" />
+                                </td>
+                                <td>
+                                    <input type="number" 
+                                           min="0" 
+                                           max="@Game.MaxPointsPerRound" 
+                                           @bind="game.Rounds[index].GroupBPoints" 
+                                           style="width: 80px; text-align: center;" />
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                        <tfoot>
+                        <tr>
+                            <th>Total</th>
+                            <th>@game.GroupATotal</th>
+                            <th>@game.GroupBTotal</th>
+                        </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <p>No rounds in this game.</p>
+            }
+        </div>
+
         <div class="button-container">
             <button class="btn secondary" @onclick="Cancel">Cancel</button>
-            <button class="btn primary" @onclick="SaveGame">Save Changes</button>
+            <button class="btn primary" @onclick="SaveGame">Save All Changes</button>
         </div>
     }
 </div>
-
 @code {
     [Parameter] public int Id { get; set; }
     
@@ -88,17 +139,45 @@
     
     private async Task SaveGame()
     {
-        // Save the game changes
-        await DbService.SaveGameAsync(game);
-        
-        // Return to the appropriate page
-        if (game.IsCompleted)
+        try
         {
-            Navigation.NavigateTo($"/gameresult/{Id}");
+            // Validate all round scores are within range
+            foreach (var round in game.Rounds)
+            {
+                round.GroupAPoints = Math.Min(Math.Max(0, round.GroupAPoints), Game.MaxPointsPerRound);
+                round.GroupBPoints = Math.Min(Math.Max(0, round.GroupBPoints), Game.MaxPointsPerRound);
+            }
+            
+            // Make sure the game's winner field is updated based on the new scores
+            UpdateWinner();
+            
+            // Save the game and all its rounds
+            await DbService.SaveGameWithRoundsAsync(game);
+            
+            // Return to the appropriate page
+            if (game.IsCompleted)
+            {
+                Navigation.NavigateTo($"/gameresult/{Id}");
+            }
+            else
+            {
+                Navigation.NavigateTo($"/game/{Id}");
+            }
         }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving game changes: {ex.Message}");
+        }
+    }
+    
+    // Update the winner field based on current scores
+    private void UpdateWinner()
+    {
+        if (game.GroupATotal > game.GroupBTotal)
+            game.Winner = game.GroupA;
+        else if (game.GroupBTotal > game.GroupATotal)
+            game.Winner = game.GroupB;
         else
-        {
-            Navigation.NavigateTo($"/game/{Id}");
-        }
+            game.Winner = "Tie";
     }
 }
