@@ -98,7 +98,7 @@
                         <div class="round-score">@round.GroupBPoints</div>
                     </div>
                     <div class="round-actions">
-                        <button class="edit-button" @onclick="() => EditRound(round)">Edit</button>
+                        <button class="edit-button" @onclick="() => NavigateToEditRound(round)">Edit</button>
                         <button class="delete-button" @onclick="() => DeleteRound(round)">Delete</button>
                     </div>
                 </div>
@@ -135,16 +135,16 @@
 
         @if (editingRound != null)
         {
-            <div class="modal-overlay">
-                <div class="modal">
+            <div class="modal-overlay" @onclick="CancelEdit">
+                <div class="modal" @onclick:stopPropagation="true">
                     <h3>Edit Round @editingRound.RoundNumber</h3>
                     <div class="input-group">
                         <label>@game.GroupA</label>
-                        <input type="number" @bind="editingRoundA" max="@Game.MaxPointsPerRound"/>
+                        <input type="number" @bind="editingRoundA" min="0" max="@Game.MaxPointsPerRound"/>
                     </div>
                     <div class="input-group">
                         <label>@game.GroupB</label>
-                        <input type="number" @bind="editingRoundB" max="@Game.MaxPointsPerRound"/>
+                        <input type="number" @bind="editingRoundB" min="0" max="@Game.MaxPointsPerRound"/>
                     </div>
                     <div class="modal-actions">
                         <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
@@ -179,7 +179,11 @@
     private ElementReference teamBInputRef;
     private bool teamAInputClicked = false;
     private bool teamBInputClicked = false;
-
+    
+    private void NavigateToEditRound(Round round)
+    {
+        Navigation.NavigateTo($"/editround/{game.Id}/{round.Id}");
+    }
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"GameScreen initializing with Id: {Id}");
@@ -285,32 +289,49 @@
         editingRound = round;
         editingRoundA = round.GroupAPoints;
         editingRoundB = round.GroupBPoints;
+        StateHasChanged();
     }
 
     private void CancelEdit()
     {
         editingRound = null;
+        StateHasChanged();
     }
 
     private async Task SaveEdit()
     {
-        if (editingRound != null)
+        if (editingRound == null) return;
+
+        try
         {
-            try
+            // Update the round's points
+            int originalId = editingRound.Id;
+            int originalGameId = editingRound.GameId;
+            int originalRoundNumber = editingRound.RoundNumber;
+        
+            // Create a new round object to avoid reference issues
+            var roundToUpdate = new Round
             {
-                // Apply edits to the round
-                editingRound.GroupAPoints = Math.Min(editingRoundA, Game.MaxPointsPerRound);
-                editingRound.GroupBPoints = Math.Min(editingRoundB, Game.MaxPointsPerRound);
-
-                await DbService.UpdateRoundAsync(editingRound);
-                editingRound = null;
-
-                await LoadGame();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error saving round edit: {ex}");
-            }
+                Id = originalId,
+                GameId = originalGameId,
+                RoundNumber = originalRoundNumber,
+                GroupAPoints = Math.Min(Math.Max(0, editingRoundA), Game.MaxPointsPerRound),
+                GroupBPoints = Math.Min(Math.Max(0, editingRoundB), Game.MaxPointsPerRound)
+            };
+        
+            // Update in database
+            await DbService.UpdateRoundAsync(roundToUpdate);
+        
+            // Reset editing state
+            editingRound = null;
+        
+            // Reload the game to refresh all data
+            await LoadGame();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving round edit: {ex.Message}");
+            editingRound = null;
         }
     }
 

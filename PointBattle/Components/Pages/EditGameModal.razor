@@ -1,0 +1,53 @@
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+
+<div class="modal-overlay">
+    <div class="modal">
+        <h3>Edit Game</h3>
+        
+        <div class="input-group">
+            <label>Team 1 Player:</label>
+            <input type="text" @bind="game.GroupA" />
+        </div>
+        
+        <div class="input-group">
+            <label>Team 1 Player 2 (Optional):</label>
+            <input type="text" @bind="game.GroupAMember2" />
+        </div>
+        
+        <div class="input-group">
+            <label>Team 2 Player:</label>
+            <input type="text" @bind="game.GroupB" />
+        </div>
+        
+        <div class="input-group">
+            <label>Team 2 Player 2 (Optional):</label>
+            <input type="text" @bind="game.GroupBMember2" />
+        </div>
+        
+        <div class="modal-actions">
+            <button class="btn secondary" @onclick="OnCancel">Cancel</button>
+            <button class="btn primary" @onclick="SaveGame">Save</button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public Game game { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback OnSave { get; set; }
+    
+    private async Task SaveGame()
+    {
+        try
+        {
+            await DbService.SaveGameAsync(game);
+            await OnSave.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving game: {ex.Message}");
+        }
+    }
+}

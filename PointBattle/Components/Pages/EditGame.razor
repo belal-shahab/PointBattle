@@ -1,0 +1,104 @@
+@page "/editgame/{Id:int}"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="container">
+    <h2>Edit Game</h2>
+
+    @if (loading)
+    {
+        <div class="loading">Loading game data...</div>
+    }
+    else
+    {
+        <div class="teams-container">
+            <div class="team-setup">
+                <h3>Team 1</h3>
+                <div class="form-group">
+                    <label>Player 1:</label>
+                    <input list="player-names" @bind="game.GroupA" placeholder="Player Name"/>
+                </div>
+                <div class="form-group">
+                    <label>Player 2 (optional):</label>
+                    <input list="player-names" @bind="game.GroupAMember2" placeholder="Player Name"/>
+                </div>
+            </div>
+
+            <div class="team-setup">
+                <h3>Team 2</h3>
+                <div class="form-group">
+                    <label>Player 1:</label>
+                    <input list="player-names" @bind="game.GroupB" placeholder="Player Name"/>
+                </div>
+                <div class="form-group">
+                    <label>Player 2 (optional):</label>
+                    <input list="player-names" @bind="game.GroupBMember2" placeholder="Player Name"/>
+                </div>
+            </div>
+        </div>
+
+        <datalist id="player-names">
+            @foreach (var name in playerNames)
+            {
+                <option value="@name"/>
+            }
+        </datalist>
+
+        <div class="button-container">
+            <button class="btn secondary" @onclick="Cancel">Cancel</button>
+            <button class="btn primary" @onclick="SaveGame">Save Changes</button>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int Id { get; set; }
+    
+    private Game game = new Game();
+    private List<string> playerNames = new List<string>();
+    private bool loading = true;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        
+        // Load the game data
+        game = await DbService.GetGameAsync(Id) ?? new Game();
+        
+        // Load player names for autocomplete
+        playerNames = await DbService.GetAllPlayerNamesAsync();
+        
+        loading = false;
+    }
+    
+    private void Cancel()
+    {
+        // Return to the previous page or game details
+        if (game.IsCompleted)
+        {
+            Navigation.NavigateTo($"/gameresult/{Id}");
+        }
+        else
+        {
+            Navigation.NavigateTo($"/game/{Id}");
+        }
+    }
+    
+    private async Task SaveGame()
+    {
+        // Save the game changes
+        await DbService.SaveGameAsync(game);
+        
+        // Return to the appropriate page
+        if (game.IsCompleted)
+        {
+            Navigation.NavigateTo($"/gameresult/{Id}");
+        }
+        else
+        {
+            Navigation.NavigateTo($"/game/{Id}");
+        }
+    }
+}

@@ -111,7 +111,8 @@
                         </div>
                     </div>
                     <div class="game-card-actions">
-                        <button class="delete-button" @onclick="() => DeleteGame(game.Id)">Delete</button>
+                        <button class="edit-button" @onclick:stopPropagation="true" @onclick="() => NavigateToEditGame(game.Id)">Edit</button>
+                        <button class="delete-button" @onclick:stopPropagation="true" @onclick="() => DeleteGame(game.Id)">Delete</button>
                     </div>
                 </div>
             }
@@ -128,13 +129,107 @@
     <div class="button-container">
         <button class="btn secondary" @onclick="BackToHome">Back</button>
     </div>
+    @if (gameToEdit != null)
+    {
+        <div class="modal-overlay" @onclick="CancelEdit">
+            <div class="modal" @onclick:stopPropagation="true">
+                <h3>Edit Game</h3>
+            
+                <div class="input-group">
+                    <label>Team 1 Player:</label>
+                    <input type="text" @bind="gameToEdit.GroupA" />
+                </div>
+            
+                <div class="input-group">
+                    <label>Team 1 Player 2 (Optional):</label>
+                    <input type="text" @bind="gameToEdit.GroupAMember2" />
+                </div>
+            
+                <div class="input-group">
+                    <label>Team 2 Player:</label>
+                    <input type="text" @bind="gameToEdit.GroupB" />
+                </div>
+            
+                <div class="input-group">
+                    <label>Team 2 Player 2 (Optional):</label>
+                    <input type="text" @bind="gameToEdit.GroupBMember2" />
+                </div>
+            
+                <div class="modal-actions">
+                    <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
+                    <button class="btn primary" @onclick="SaveEdit">Save</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     private List<Game> games = new List<Game>();
     private List<Game> todayGames = new List<Game>();
     private bool showAllGames = false;
+    private Game gameToEdit = null;
 
+    private void NavigateToEditGame(int gameId)
+    {
+        Navigation.NavigateTo($"/editgame/{gameId}");
+    }
+    private void EditGame(Game game)
+    {
+        // Create a copy of the game to edit
+        gameToEdit = new Game
+        {
+            Id = game.Id,
+            GroupA = game.GroupA,
+            GroupAMember2 = game.GroupAMember2,
+            GroupB = game.GroupB,
+            GroupBMember2 = game.GroupBMember2,
+            Date = game.Date,
+            IsCompleted = game.IsCompleted,
+            Winner = game.Winner
+        };
+    }
+
+    private void CancelEdit()
+    {
+        gameToEdit = null;
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            if (gameToEdit != null)
+            {
+                // Load the original game to get the rounds
+                var originalGame = await DbService.GetGameAsync(gameToEdit.Id);
+                if (originalGame != null)
+                {
+                    gameToEdit.Rounds = originalGame.Rounds;
+                }
+            
+                // Save the edited game
+                await DbService.SaveGameAsync(gameToEdit);
+            
+                // Reload all games
+                await LoadGames();
+            
+                // Close the modal
+                gameToEdit = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving game edit: {ex.Message}");
+        }
+    }
+    
+
+    private async Task FinishEdit()
+    {
+        gameToEdit = null;
+        await LoadGames();
+    }
     protected override async Task OnInitializedAsync()
     {
         await LoadGames();
@@ -233,4 +328,5 @@
         public int Ties { get; set; }
         public int TotalPoints { get; set; }
     }
+    
 }

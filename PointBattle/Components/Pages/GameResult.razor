@@ -69,15 +69,100 @@
 
     <div class="button-container">
         <button class="btn secondary" @onclick="BackToHome">Home</button>
+        <button class="btn warning" @onclick="NavigateToEditGame">Edit Game</button>
         <button class="btn primary" @onclick="NewGame">New Game</button>
     </div>
+    
+    @if (isEditing)
+    {
+        <div class="modal-overlay" @onclick="CancelEdit">
+            <div class="modal" @onclick:stopPropagation="true">
+                <h3>Edit Game</h3>
+            
+                <div class="input-group">
+                    <label>Team 1 Player:</label>
+                    <input type="text" @bind="editedGame.GroupA" />
+                </div>
+            
+                <div class="input-group">
+                    <label>Team 1 Player 2 (Optional):</label>
+                    <input type="text" @bind="editedGame.GroupAMember2" />
+                </div>
+            
+                <div class="input-group">
+                    <label>Team 2 Player:</label>
+                    <input type="text" @bind="editedGame.GroupB" />
+                </div>
+            
+                <div class="input-group">
+                    <label>Team 2 Player 2 (Optional):</label>
+                    <input type="text" @bind="editedGame.GroupBMember2" />
+                </div>
+            
+                <div class="modal-actions">
+                    <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
+                    <button class="btn primary" @onclick="SaveEdit">Save</button>
+                </div>
+            </div>
+        </div>
+    }
 </div>
 
 @code {
     [Parameter] public int Id { get; set; }
 
     private Game game = new Game();
+    private bool isEditing = false;
+    private Game editedGame = new Game();
 
+    private void NavigateToEditGame()
+    {
+        Navigation.NavigateTo($"/editgame/{Id}");
+    }
+    private void EditGame()
+    {
+        // Create a copy of the game to edit
+        editedGame = new Game
+        {
+            Id = game.Id,
+            GroupA = game.GroupA,
+            GroupAMember2 = game.GroupAMember2,
+            GroupB = game.GroupB,
+            GroupBMember2 = game.GroupBMember2,
+            Date = game.Date,
+            IsCompleted = game.IsCompleted,
+            Winner = game.Winner
+        };
+    
+        isEditing = true;
+    }
+
+    private void CancelEdit()
+    {
+        isEditing = false;
+    }
+
+    private async Task SaveEdit()
+    {
+        try
+        {
+            // Keep the rounds reference
+            editedGame.Rounds = game.Rounds;
+        
+            // Save the edited game
+            await DbService.SaveGameAsync(editedGame);
+        
+            // Refresh the game data
+            game = await DbService.GetGameAsync(Id) ?? new Game();
+        
+            // Close the modal
+            isEditing = false;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving game edit: {ex.Message}");
+        }
+    }
     protected override async Task OnInitializedAsync()
     {
         game = await DbService.GetGameAsync(Id) ?? new Game();
@@ -92,5 +177,12 @@
     {
         Navigation.NavigateTo("/newgame", forceLoad: true);
     }
-
+    
+    
+    
+    private async Task FinishEdit()
+    {
+        isEditing = false;
+        game = await DbService.GetGameAsync(Id) ?? new Game();
+    }
 }

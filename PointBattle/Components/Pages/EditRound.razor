@@ -1,0 +1,88 @@
+@page "/editround/{GameId:int}/{RoundId:int}"
+@using PointBattle.Models
+@using PointBattle.Services
+@inject DatabaseService DbService
+@inject NavigationManager Navigation
+
+<div class="container">
+    <h2>Edit Round</h2>
+
+    @if (loading)
+    {
+        <div class="loading">Loading round data...</div>
+    }
+    else
+    {
+        <div class="new-round">
+            <h3>Round @round.RoundNumber</h3>
+            
+            <div class="input-group">
+                <label>@game.GroupA</label>
+                <input type="number" @bind="round.GroupAPoints" min="0" max="@Game.MaxPointsPerRound"/>
+                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+            </div>
+            
+            <div class="input-group">
+                <label>@game.GroupB</label>
+                <input type="number" @bind="round.GroupBPoints" min="0" max="@Game.MaxPointsPerRound"/>
+                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+            </div>
+            
+            <div class="button-container">
+                <button class="btn secondary" @onclick="Cancel">Cancel</button>
+                <button class="btn primary" @onclick="SaveRound">Save Changes</button>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter] public int GameId { get; set; }
+    [Parameter] public int RoundId { get; set; }
+    
+    private Game game = new Game();
+    private Round round = new Round();
+    private bool loading = true;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        loading = true;
+        
+        // Load the game data
+        game = await DbService.GetGameAsync(GameId) ?? new Game();
+        
+        // Find the round
+        if (game != null && game.Rounds != null)
+        {
+            round = game.Rounds.FirstOrDefault(r => r.Id == RoundId) ?? new Round();
+        }
+        
+        loading = false;
+    }
+    
+    private void Cancel()
+    {
+        // Return to the game page
+        Navigation.NavigateTo($"/game/{GameId}");
+    }
+    
+    private async Task SaveRound()
+    {
+        try
+        {
+            // Ensure the points are within valid range
+            round.GroupAPoints = Math.Min(Math.Max(0, round.GroupAPoints), Game.MaxPointsPerRound);
+            round.GroupBPoints = Math.Min(Math.Max(0, round.GroupBPoints), Game.MaxPointsPerRound);
+            
+            // Update the round in the database
+            await DbService.UpdateRoundAsync(round);
+            
+            // Navigate back to the game page
+            Navigation.NavigateTo($"/game/{GameId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error saving round: {ex.Message}");
+        }
+    }
+}

@@ -184,6 +184,22 @@ public class DatabaseService
     public async Task UpdateRoundAsync(Round round)
     {
         await InitializeAsync();
-        await Database.UpdateAsync(round);
+    
+        try 
+        {
+            Console.WriteLine($"Updating round: {round.Id}, Points: {round.GroupAPoints}-{round.GroupBPoints}");
+        
+            // Simple direct update
+            await Database.ExecuteAsync(
+                "UPDATE rounds SET GroupAPoints = ?, GroupBPoints = ? WHERE Id = ?",
+                round.GroupAPoints, round.GroupBPoints, round.Id);
+        
+            Console.WriteLine("Round updated successfully");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in UpdateRoundAsync: {ex.Message}");
+            throw;
+        }
     }
 }

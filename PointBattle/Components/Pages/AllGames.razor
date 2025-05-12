@@ -50,11 +50,16 @@
                         </div>
                     </div>
                     <div class="game-card-actions">
+                        <button class="edit-button" @onclick="() => EditGame(game)">Edit</button>
                         <button class="delete-button" @onclick="() => DeleteGame(game.Id)">Delete</button>
                     </div>
                 </div>
             }
         </div>
+    }
+    @if (gameToEdit != null)
+    {
+        <EditGameModal game="@gameToEdit" OnCancel="CancelEdit" OnSave="FinishEdit" />
     }
 </div>
 
@@ -63,6 +68,24 @@
     private List<Game> filteredGames = new List<Game>();
     private string searchText = "";
     private bool loading = true;
+    private Game gameToEdit = null;
+
+    private void EditGame(Game game)
+    {
+        gameToEdit = game;
+    }
+
+    private void CancelEdit()
+    {
+        gameToEdit = null;
+    }
+
+    private async Task FinishEdit()
+    {
+        gameToEdit = null;
+        await LoadGames();
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
