@@ -1,0 +1,22 @@
+@inject PointBattle.Services.LocalizationService Loc
+@implements IDisposable
+
+<span class="@AdditionalClass">@Loc.GetString(Key)</span>
+
+@code {
+    [Parameter]
+    public string Key { get; set; }
+    
+    [Parameter]
+    public string AdditionalClass { get; set; } = "";
+    
+    protected override void OnInitialized()
+    {
+        Loc.OnLanguageChanged += StateHasChanged;
+    }
+    
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= StateHasChanged;
+    }
+}

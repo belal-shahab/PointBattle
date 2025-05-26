@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" dir="ltr">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
@@ -14,7 +14,6 @@
 </head>
 
 <body>
-
     <div class="status-bar-safe-area"></div>
 
     <div id="app">Loading...</div>
@@ -26,30 +25,19 @@
     </div>
 
     <script src="_framework/blazor.webview.js" autostart="false"></script>
-    
-    <script>
-        // Add this script for handling input focus and mobile keyboard
-        function setupInputFocus() {
-            // Add event listeners for handling viewport adjustments on mobile
-            window.addEventListener('resize', function() {
-                // This will help adjust the view when keyboard appears/disappears on mobile
-                if (document.activeElement.tagName === 'INPUT') {
-                    setTimeout(() => document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-                }
-            });
-        }
-
-        function scrollToInput(inputId) {
-            // Scroll to ensure input is visible, especially on mobile
-            const inputElement = document.activeElement;
-            if (inputElement) {
-                setTimeout(() => inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
-            }
-        }
-    </script>
-    <script src="_framework/blazor.webview.js" autostart="false"></script>
-    <!-- Add reference to our custom JavaScript file -->
     <script src="js/app.js"></script>
+    <script>
+        // Add this at the top of your body or head section
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if we need to apply RTL on startup
+            const language = localStorage.getItem('app_language');
+            if (language === 'ckb') {
+                document.documentElement.setAttribute('dir', 'rtl');
+                document.documentElement.style.direction = 'rtl';
+                document.body.classList.add('rtl-mode');
+            }
+        });
+    </script>
 </body>
 
 </html>

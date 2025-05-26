@@ -3,27 +3,29 @@
 @using PointBattle.Services
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="all-games-container">
     <div class="page-header">
         <button class="back-button" @onclick="BackToHistory">
-            <span>←</span> Back to History
+            <span>←</span> <LocalizedText Key="BackToHistory" />
         </button>
-        <h2>All Games</h2>
+        <h2><LocalizedText Key="AllGames" /></h2>
     </div>
 
     @if (loading)
     {
-        <div class="loading">Loading games...</div>
+        <div class="loading"><LocalizedText Key="Loading" /></div>
     }
     else if (games.Count == 0)
     {
-        <p>No games found.</p>
+        <p><LocalizedText Key="NoGamesYet" /></p>
     }
     else
     {
         <div class="game-filter">
-            <input type="text" placeholder="Search by player name" @bind="searchText" @bind:event="oninput" @onkeyup="FilterGames" />
+            <input type="text" placeholder="@Loc.GetString("SearchPlayers")" @bind="searchText" @bind:event="oninput" @onkeyup="FilterGames" />
         </div>
 
         <div class="games-list">
@@ -32,26 +34,26 @@
                 <div class="game-card">
                     <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
                         <div class="game-date">@game.Date.ToString("MMM d, yyyy")</div>
-                        <div class="game-teams">@game.GroupAFullName vs @game.GroupBFullName</div>
+                        <div class="game-teams">@game.GroupAFullName <LocalizedText Key="VS" /> @game.GroupBFullName</div>
                         <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
                         <div class="game-winner">
                             @if (game.GroupATotal > game.GroupBTotal)
                             {
-                                <span class="winner-text">@game.GroupAFullName wins!</span>
+                                <span class="winner-text">@game.GroupAFullName <LocalizedText Key="WinsExcl" /></span>
                             }
                             else if (game.GroupBTotal > game.GroupATotal)
                             {
-                                <span class="winner-text">@game.GroupBFullName wins!</span>
+                                <span class="winner-text">@game.GroupBFullName <LocalizedText Key="WinsExcl" /></span>
                             }
                             else
                             {
-                                <span>Tie game</span>
+                                <span><LocalizedText Key="TieGame" /></span>
                             }
                         </div>
                     </div>
                     <div class="game-card-actions">
-                        <button class="edit-button" @onclick:stopPropagation="true" @onclick="() => NavigateToEditGame(game.Id)">Edit</button>
-                        <button class="delete-button" @onclick="() => DeleteGame(game.Id)">Delete</button>
+                        <button class="edit-button" @onclick:stopPropagation="true" @onclick="() => NavigateToEditGame(game.Id)"><LocalizedText Key="Edit" /></button>
+                        <button class="delete-button" @onclick="() => DeleteGame(game.Id)"><LocalizedText Key="Delete" /></button>
                     </div>
                 </div>
             }
@@ -88,7 +90,6 @@
         gameToEdit = null;
         await LoadGames();
     }
-
 
     protected override async Task OnInitializedAsync()
     {
@@ -137,5 +138,24 @@
     private void BackToHistory()
     {
         Navigation.NavigateTo("/history");
+    }
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        base.OnInitialized();
+    }
+
+    private void OnLanguageChanged()
+    {
+        // Update UI when language changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 }

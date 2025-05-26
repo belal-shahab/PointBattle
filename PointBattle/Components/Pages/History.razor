@@ -3,32 +3,34 @@
 @using PointBattle.Services
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="history-container">
-    <h2>Game Dashboard</h2>
+    <h2><LocalizedText Key="GameDashboard" /></h2>
 
     @if (games.Count == 0)
     {
-        <p>No games played yet!</p>
+        <p><LocalizedText Key="NoGamesYet" /></p>
     }
     else
     {
         <div class="dashboard-stats">
             <div class="stat-card">
-                <div class="stat-title">Total Games</div>
+                <div class="stat-title"><LocalizedText Key="TotalGames" /></div>
                 <div class="stat-value">@games.Count</div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">Completed Games</div>
+                <div class="stat-title"><LocalizedText Key="CompletedGames" /></div>
                 <div class="stat-value">@games.Count(g => g.IsCompleted)</div>
             </div>
             <div class="stat-card">
-                <div class="stat-title">In Progress</div>
+                <div class="stat-title"><LocalizedText Key="InProgress" /></div>
                 <div class="stat-value">@games.Count(g => !g.IsCompleted)</div>
             </div>
         </div>
 
-        <h3>Today's Games</h3>
+        <h3><LocalizedText Key="TodaysGames" /></h3>
         <div class="today-games">
             @if (todayGames.Count > 0)
             {
@@ -38,20 +40,20 @@
                         <div class="game-card today-game-card">
                             <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
                                 <div class="game-date">@game.Date.ToString("h:mm tt")</div>
-                                <div class="game-teams">@game.GroupAFullName vs @game.GroupBFullName</div>
+                                <div class="game-teams">@game.GroupAFullName <LocalizedText Key="VS" /> @game.GroupBFullName</div>
                                 <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
                                 <div class="game-winner">
                                     @if (game.GroupATotal > game.GroupBTotal)
                                     {
-                                        <span class="winner-text">@game.GroupAFullName wins!</span>
+                                        <span class="winner-text">@game.GroupAFullName <LocalizedText Key="WinsExcl" /></span>
                                     }
                                     else if (game.GroupBTotal > game.GroupATotal)
                                     {
-                                        <span class="winner-text">@game.GroupBFullName wins!</span>
+                                        <span class="winner-text">@game.GroupBFullName <LocalizedText Key="WinsExcl" /></span>
                                     }
                                     else
                                     {
-                                        <span>Tie game</span>
+                                        <span><LocalizedText Key="TieGame" /></span>
                                     }
                                 </div>
                             </div>
@@ -61,13 +63,13 @@
             }
             else
             {
-                <p>No games played today.</p>
+                <p><LocalizedText Key="NoGamesToday" /></p>
             }
         </div>
 
         <div class="player-stats-container">
-            <h3>Player Statistics</h3>
-            <p>Click on a player to view their detailed profile</p>
+            <h3><LocalizedText Key="PlayerStats" /></h3>
+            <p><LocalizedText Key="ClickToViewDetail" /></p>
             <div class="player-stats">
                 @foreach (var player in GetPlayerStats())
                 {
@@ -78,41 +80,41 @@
                             <span class="losses">@player.Losses L</span> /
                             <span class="ties">@player.Ties T</span>
                         </div>
-                        <div class="player-points">Total Points: @player.TotalPoints</div>
-                        <div class="player-winrate">Win Rate: @(CalculateWinRate(player.Wins, player.Losses, player.Ties).ToString("0.0"))%</div>
-                        <div class="view-profile">View Profile →</div>
+                        <div class="player-points"><LocalizedText Key="TotalPoints" />: @player.TotalPoints</div>
+                        <div class="player-winrate"><LocalizedText Key="WinRate" />: @(CalculateWinRate(player.Wins, player.Losses, player.Ties).ToString("0.0"))%</div>
+                        <div class="view-profile"><LocalizedText Key="ViewProfile" /> →</div>
                     </div>
                 }
             </div>
         </div>
 
-        <h3>Recent Games</h3>
+        <h3><LocalizedText Key="RecentGames" /></h3>
         <div class="games-list">
             @foreach (var game in games.OrderByDescending(g => g.Date).Take(5))
             {
                 <div class="game-card">
                     <div class="game-card-content" @onclick="() => ViewGame(game.Id)">
                         <div class="game-date">@game.Date.ToString("MMM d, yyyy")</div>
-                        <div class="game-teams">@game.GroupAFullName vs @game.GroupBFullName</div>
+                        <div class="game-teams">@game.GroupAFullName <LocalizedText Key="VS" /> @game.GroupBFullName</div>
                         <div class="game-score">@game.GroupATotal - @game.GroupBTotal</div>
                         <div class="game-winner">
                             @if (game.GroupATotal > game.GroupBTotal)
                             {
-                                <span class="winner-text">@game.GroupAFullName wins!</span>
+                                <span class="winner-text">@game.GroupAFullName <LocalizedText Key="WinsExcl" /></span>
                             }
                             else if (game.GroupBTotal > game.GroupATotal)
                             {
-                                <span class="winner-text">@game.GroupBFullName wins!</span>
+                                <span class="winner-text">@game.GroupBFullName <LocalizedText Key="WinsExcl" /></span>
                             }
                             else
                             {
-                                <span>Tie game</span>
+                                <span><LocalizedText Key="TieGame" /></span>
                             }
                         </div>
                     </div>
                     <div class="game-card-actions">
-                        <button class="edit-button" @onclick:stopPropagation="true" @onclick="() => NavigateToEditGame(game.Id)">Edit</button>
-                        <button class="delete-button" @onclick:stopPropagation="true" @onclick="() => DeleteGame(game.Id)">Delete</button>
+                        <button class="edit-button" @onclick:stopPropagation="true" @onclick="() => NavigateToEditGame(game.Id)"><LocalizedText Key="Edit" /></button>
+                        <button class="delete-button" @onclick:stopPropagation="true" @onclick="() => DeleteGame(game.Id)"><LocalizedText Key="Delete" /></button>
                     </div>
                 </div>
             }
@@ -121,43 +123,43 @@
         @if (games.Count > 5)
         {
             <div class="see-all-games">
-                <button class="btn secondary" @onclick="ViewAllGames">See All Games</button>
+                <button class="btn secondary" @onclick="ViewAllGames"><LocalizedText Key="SeeAllGames" /></button>
             </div>
         }
     }
 
     <div class="button-container">
-        <button class="btn secondary" @onclick="BackToHome">Back</button>
+        <button class="btn secondary" @onclick="BackToHome"><LocalizedText Key="Back" /></button>
     </div>
     @if (gameToEdit != null)
     {
         <div class="modal-overlay" @onclick="CancelEdit">
             <div class="modal" @onclick:stopPropagation="true">
-                <h3>Edit Game</h3>
+                <h3><LocalizedText Key="EditGame" /></h3>
             
                 <div class="input-group">
-                    <label>Team 1 Player:</label>
+                    <label><LocalizedText Key="Team1" /> <LocalizedText Key="Player1" />:</label>
                     <input type="text" @bind="gameToEdit.GroupA" />
                 </div>
             
                 <div class="input-group">
-                    <label>Team 1 Player 2 (Optional):</label>
+                    <label><LocalizedText Key="Team1" /> <LocalizedText Key="Player2" />:</label>
                     <input type="text" @bind="gameToEdit.GroupAMember2" />
                 </div>
             
                 <div class="input-group">
-                    <label>Team 2 Player:</label>
+                    <label><LocalizedText Key="Team2" /> <LocalizedText Key="Player1" />:</label>
                     <input type="text" @bind="gameToEdit.GroupB" />
                 </div>
             
                 <div class="input-group">
-                    <label>Team 2 Player 2 (Optional):</label>
+                    <label><LocalizedText Key="Team2" /> <LocalizedText Key="Player2" />:</label>
                     <input type="text" @bind="gameToEdit.GroupBMember2" />
                 </div>
             
                 <div class="modal-actions">
-                    <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
-                    <button class="btn primary" @onclick="SaveEdit">Save</button>
+                    <button class="btn secondary" @onclick="CancelEdit"><LocalizedText Key="Cancel" /></button>
+                    <button class="btn primary" @onclick="SaveEdit"><LocalizedText Key="Save" /></button>
                 </div>
             </div>
         </div>
@@ -329,5 +331,22 @@
         public int Ties { get; set; }
         public int TotalPoints { get; set; }
     }
-    
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        // Update UI when language changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
 }

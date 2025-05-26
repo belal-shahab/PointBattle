@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AppName" xml:space="preserve">
+    <value>ئۆکەی</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>سەرەکی</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>دەربارە</value>
+  </data>
+  <data name="NewGame" xml:space="preserve">
+    <value>یاری نوێ</value>
+  </data>
+  <data name="GameHistory" xml:space="preserve">
+    <value>مێژووی یاری</value>
+  </data>
+  <data name="Team1" xml:space="preserve">
+    <value>تیمی ١</value>
+  </data>
+  <data name="Team2" xml:space="preserve">
+    <value>تیمی ٢</value>
+  </data>
+  <data name="Player1" xml:space="preserve">
+    <value>یاریزانی ١</value>
+  </data>
+  <data name="Player2" xml:space="preserve">
+    <value>یاریزانی ٢ (ئارەزوومەندانە)</value>
+  </data>
+  <data name="PlayerName" xml:space="preserve">
+    <value>ناوی یاریزان</value>
+  </data>
+  <data name="StartGame" xml:space="preserve">
+    <value>دەستپێکردنی یاری</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>پاشگەزبوونەوە</value>
+  </data>
+  <data name="Round" xml:space="preserve">
+    <value>خول</value>
+  </data>
+  <data name="Rounds" xml:space="preserve">
+    <value>خولەکان</value>
+  </data>
+  <data name="Points" xml:space="preserve">
+    <value>خاڵەکان</value>
+  </data>
+  <data name="AddRound" xml:space="preserve">
+    <value>زیادکردنی خول</value>
+  </data>
+  <data name="EndGame" xml:space="preserve">
+    <value>کۆتایی یاری</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>دەستکاری</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>سڕینەوە</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>پاشەکەوت</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>گەڕانەوە</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>چاوەڕوان بە...</value>
+  </data>
+  <data name="Wins" xml:space="preserve">
+    <value>بردنەوەکان</value>
+  </data>
+  <data name="Losses" xml:space="preserve">
+    <value>دۆڕانەکان</value>
+  </data>
+  <data name="Ties" xml:space="preserve">
+    <value>یەکسانییەکان</value>
+  </data>
+  <data name="GameResult" xml:space="preserve">
+    <value>ئەنجامی یاری</value>
+  </data>
+  <data name="WinsExcl" xml:space="preserve">
+    <value>بردیەوە!</value>
+  </data>
+  <data name="ItsATie" xml:space="preserve">
+    <value>یەکسانە!</value>
+  </data>
+  <data name="VS" xml:space="preserve">
+    <value>دژی</value>
+  </data>
+  <data name="RoundSummary" xml:space="preserve">
+    <value>پوختەی خولەکان</value>
+  </data>
+  <data name="NoGamesYet" xml:space="preserve">
+    <value>هێشتا هیچ یارییەک نەکراوە!</value>
+  </data>
+  <data name="TotalGames" xml:space="preserve">
+    <value>کۆی یارییەکان</value>
+  </data>
+  <data name="CompletedGames" xml:space="preserve">
+    <value>یارییە تەواوبووەکان</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>لە بەردەوامیدا</value>
+  </data>
+  <data name="TodaysGames" xml:space="preserve">
+    <value>یارییەکانی ئەمڕۆ</value>
+  </data>
+  <data name="PlayerStats" xml:space="preserve">
+    <value>ئامارەکانی یاریزان</value>
+  </data>
+  <data name="ViewProfile" xml:space="preserve">
+    <value>بینینی پڕۆفایل</value>
+  </data>
+  <data name="RecentGames" xml:space="preserve">
+    <value>یارییە نوێیەکان</value>
+  </data>
+  <data name="AllGames" xml:space="preserve">
+    <value>هەموو یارییەکان</value>
+  </data>
+  <data name="SearchPlayers" xml:space="preserve">
+    <value>گەڕان بەناوی یاریزان</value>
+  </data>
+  <data name="GameInProgress" xml:space="preserve">
+    <value>یاری لە بەردەوامیدایە</value>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>زۆرترین</value>
+  </data>
+  <data name="EditRound" xml:space="preserve">
+    <value>دەستکاریکردنی خول</value>
+  </data>
+  <data name="NewRound" xml:space="preserve">
+    <value>خولی نوێ</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>پاشەکەوتکردنی گۆڕانکارییەکان</value>
+  </data>
+  <data name="EditGame" xml:space="preserve">
+    <value>دەستکاریکردنی یاری</value>
+  </data>
+  <data name="SaveAllChanges" xml:space="preserve">
+    <value>پاشەکەوتکردنی هەموو گۆڕانکارییەکان</value>
+  </data>
+  <data name="NoRounds" xml:space="preserve">
+    <value>هیچ خولێک نیە لەم یارییەدا</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>کۆی گشتی</value>
+  </data>
+  <data name="GameDashboard" xml:space="preserve">
+    <value>داشبۆردی یاری</value>
+  </data>
+  <data name="NoGamesToday" xml:space="preserve">
+    <value>ئەمڕۆ هیچ یارییەک نەکراوە</value>
+  </data>
+  <data name="WinRate" xml:space="preserve">
+    <value>ڕێژەی بردنەوە</value>
+  </data>
+  <data name="TotalPoints" xml:space="preserve">
+    <value>کۆی خاڵەکان</value>
+  </data>
+  <data name="ProfileOf" xml:space="preserve">
+    <value>پڕۆفایلی</value>
+  </data>
+  <data name="Games" xml:space="preserve">
+    <value>یارییەکان</value>
+  </data>
+  <data name="Partnerships" xml:space="preserve">
+    <value>هاوبەشییەکان</value>
+  </data>
+  <data name="WonWith" xml:space="preserve">
+    <value>بردویەتەوە لەگەڵ هاوڕێکانی:</value>
+  </data>
+  <data name="LostWith" xml:space="preserve">
+    <value>دۆڕاوە لەگەڵ هاوڕێکانی:</value>
+  </data>
+  <data name="NoWinsWithTeammates" xml:space="preserve">
+    <value>هێشتا هیچ بردنەوەیەک نییە لەگەڵ هاوڕێکان</value>
+  </data>
+  <data name="NoLossesWithTeammates" xml:space="preserve">
+    <value>هێشتا هیچ دۆڕانێک نییە لەگەڵ هاوڕێکان</value>
+  </data>
+  <data name="WinsTogether" xml:space="preserve">
+    <value>بردنەوە پێکەوە</value>
+  </data>
+  <data name="LossesTogether" xml:space="preserve">
+    <value>دۆڕان پێکەوە</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>جار</value>
+  </data>
+  <data name="Times" xml:space="preserve">
+    <value>جار</value>
+  </data>
+  <data name="TieGame" xml:space="preserve">
+    <value>یاری یەکسان</value>
+  </data>
+  <data name="WonBy" xml:space="preserve">
+    <value>بردویەتیەوە بە</value>
+  </data>
+  <data name="LostBy" xml:space="preserve">
+    <value>دۆڕاوە بە</value>
+  </data>
+  <data name="PointsWord" xml:space="preserve">
+    <value>خاڵ</value>
+  </data>
+  <data name="PointWord" xml:space="preserve">
+    <value>خاڵ</value>
+  </data>
+  <data name="BackToHistory" xml:space="preserve">
+    <value>گەڕانەوە بۆ مێژوو</value>
+  </data>
+  <data name="LeadsBy" xml:space="preserve">
+    <value>پێشەنگە بە</value>
+  </data>
+  <data name="TeamsAreTied" xml:space="preserve">
+    <value>تیمەکان یەکسانن</value>
+  </data>
+  <data name="RoundOf" xml:space="preserve">
+    <value>خولی</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>لە</value>
+  </data>
+  <data name="HasAlreadyWon" xml:space="preserve">
+    <value>پێشتر بردویەتییەوە!</value>
+  </data>
+  <data name="Needs" xml:space="preserve">
+    <value>پێویستی بە</value>
+  </data>
+  <data name="ButOnly" xml:space="preserve">
+    <value>بەڵام تەنها</value>
+  </data>
+  <data name="ArePossibleInRemainingRounds" xml:space="preserve">
+    <value>ئیمکانی هەیە لە خولەکانی ماوەدا</value>
+  </data>
+  <data name="ClickToViewDetail" xml:space="preserve">
+    <value>کلیک لەسەر یاریزانێک بکە بۆ بینینی پڕۆفایلی بە وردی</value>
+  </data>
+  <data name="SeeAllGames" xml:space="preserve">
+    <value>بینینی هەموو یارییەکان</value>
+  </data>
+  <data name="test" xml:space="preserve">
+    <value>لەگەڵ هاوڕێکانت بەدواداچوون بۆ خاڵەکانی یارییەکەت بکە!</value>
+  </data>
+</root>

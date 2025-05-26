@@ -1650,3 +1650,254 @@ h1, h2, h3 {
     background-color: #f44336;
     color: white;
 }
+
+/* RTL Support */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .nav-item {
+    padding-right: 0;
+    padding-left: 3px;
+}
+
+[dir="rtl"] .team-score, 
+[dir="rtl"] .round-actions,
+[dir="rtl"] .game-card-actions {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .back-button span {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+[dir="rtl"] .button-container {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .point-difference-display {
+    border-right: 4px solid #2196F3;
+    border-left: none;
+}
+
+[dir="rtl"] .language-button {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    padding: 0.3rem 0.7rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+/* Language switcher button */
+.language-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    padding: 0.3rem 0.7rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+}
+
+.language-button:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Enhanced RTL Support */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .nav-item {
+    padding-right: 0;
+    padding-left: 3px;
+}
+
+[dir="rtl"] .team-score, 
+[dir="rtl"] .round-actions,
+[dir="rtl"] .game-card-actions {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .back-button span {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+[dir="rtl"] .button-container {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .point-difference-display {
+    border-right: 4px solid #2196F3;
+    border-left: none;
+}
+
+[dir="rtl"] .language-button {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    right: auto;
+}
+
+/* Language switcher button with improved mobile support */
+.language-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    padding: 0.5rem 0.8rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    min-height: 44px; /* Better for touch targets */
+    z-index: 1000; /* Ensure button is always clickable */
+}
+
+.language-button:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Add rtl-layout class to handle page structure */
+.rtl-layout .sidebar {
+    order: 1;
+}
+
+.rtl-layout main {
+    order: 0;
+}
+
+/* Better mobile support for RTL */
+@media (max-width: 640px) {
+    .language-button {
+        top: 0.7rem;
+        padding: 0.4rem 0.7rem;
+    }
+    
+    [dir="rtl"] .game-card-actions, 
+    [dir="rtl"] .button-container,
+    [dir="rtl"] .modal-actions {
+        flex-direction: column;
+    }
+    
+    [dir="rtl"] .team-setup {
+        width: 100%;
+    }
+}
+
+/* Improve touch targets */
+@media (pointer: coarse) {
+    .language-button {
+        min-height: 44px;
+        min-width: 60px;
+    }
+}
+
+/* RTL Support - Add to the bottom of your app.css file */
+[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .nav-item {
+    padding-right: 0;
+    padding-left: 3px;
+}
+
+[dir="rtl"] .rtl-direction,
+[dir="rtl"] .team-score, 
+[dir="rtl"] .round-actions,
+[dir="rtl"] .game-card-actions {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .back-button span {
+    transform: rotate(180deg);
+    display: inline-block;
+}
+
+[dir="rtl"] .button-container {
+    flex-direction: row-reverse;
+}
+
+[dir="rtl"] .point-difference-display {
+    border-right: 4px solid #2196F3;
+    border-left: none;
+}
+
+[dir="rtl"] .language-button {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    right: auto;
+}
+
+.rtl-layout .sidebar {
+    order: 1;
+}
+
+.rtl-layout main {
+    order: 0;
+}
+
+/* Language switcher button with improved mobile support */
+.language-button {
+    position: absolute;
+    top: 0.5rem;
+    right: 1rem;
+    padding: 0.5rem 0.8rem;
+    background-color: rgba(0, 0, 0, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 1rem;
+    min-height: 44px; /* Better for touch targets */
+    z-index: 1000; /* Ensure button is always clickable */
+}
+
+.language-button:hover {
+    background-color: rgba(0, 0, 0, 0.4);
+}
+
+/* Better mobile support for RTL */
+@media (max-width: 640px) {
+    .language-button {
+        top: 0.7rem;
+        padding: 0.4rem 0.7rem;
+    }
+    
+    [dir="rtl"] .game-card-actions, 
+    [dir="rtl"] .button-container,
+    [dir="rtl"] .modal-actions {
+        flex-direction: column;
+    }
+    
+    [dir="rtl"] .team-setup {
+        width: 100%;
+    }
+}
+
+/* Improve touch targets */
+@media (pointer: coarse) {
+    .language-button,
+    .btn,
+    .edit-button,
+    .delete-button {
+        min-height: 44px;
+        min-width: 60px;
+    }
+}

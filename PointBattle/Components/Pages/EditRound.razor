@@ -3,34 +3,36 @@
 @using PointBattle.Services
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="container">
-    <h2>Edit Round</h2>
+    <h2><LocalizedText Key="EditRound" /></h2>
 
     @if (loading)
     {
-        <div class="loading">Loading round data...</div>
+        <div class="loading"><LocalizedText Key="Loading" /></div>
     }
     else
     {
         <div class="new-round">
-            <h3>Round @round.RoundNumber</h3>
+            <h3><LocalizedText Key="Round" /> @round.RoundNumber</h3>
             
             <div class="input-group">
                 <label>@game.GroupA</label>
                 <input type="number" @bind="round.GroupAPoints" min="0" max="@Game.MaxPointsPerRound"/>
-                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+                <span class="helper-text"><LocalizedText Key="Max" />: @Game.MaxPointsPerRound</span>
             </div>
             
             <div class="input-group">
                 <label>@game.GroupB</label>
                 <input type="number" @bind="round.GroupBPoints" min="0" max="@Game.MaxPointsPerRound"/>
-                <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+                <span class="helper-text"><LocalizedText Key="Max" />: @Game.MaxPointsPerRound</span>
             </div>
             
             <div class="button-container">
-                <button class="btn secondary" @onclick="Cancel">Cancel</button>
-                <button class="btn primary" @onclick="SaveRound">Save Changes</button>
+                <button class="btn secondary" @onclick="Cancel"><LocalizedText Key="Cancel" /></button>
+                <button class="btn primary" @onclick="SaveRound"><LocalizedText Key="SaveChanges" /></button>
             </div>
         </div>
     }
@@ -58,6 +60,25 @@
         }
         
         loading = false;
+    }
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        base.OnInitialized();
+    }
+
+    private void OnLanguageChanged()
+    {
+        // Update UI when language changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
     
     private void Cancel()

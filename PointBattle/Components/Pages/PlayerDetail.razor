@@ -3,18 +3,20 @@
 @using PointBattle.Services
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="player-profile-container">
     <div class="player-header">
         <button class="back-button" @onclick="BackToHistory">
-            <span>←</span> Back to History
+            <span>←</span> <LocalizedText Key="BackToHistory" />
         </button>
-        <h2>@PlayerName's Profile</h2>
+        <h2>@PlayerName <LocalizedText Key="ProfileOf" /></h2>
     </div>
 
     @if (loading)
     {
-        <div class="loading">Loading player data...</div>
+        <div class="loading"><LocalizedText Key="Loading" /></div>
     }
     else if (playerStats == null)
     {
@@ -25,33 +27,33 @@
         <div class="player-summary-card">
             <div class="player-stat-row">
                 <div class="player-stat-box">
-                    <div class="stat-label">Games</div>
+                    <div class="stat-label"><LocalizedText Key="Games" /></div>
                     <div class="stat-value">@(playerStats.Wins + playerStats.Losses + playerStats.Ties)</div>
                 </div>
                 <div class="player-stat-box">
-                    <div class="stat-label">Wins</div>
+                    <div class="stat-label"><LocalizedText Key="Wins" /></div>
                     <div class="stat-value wins">@playerStats.Wins</div>
                 </div>
                 <div class="player-stat-box">
-                    <div class="stat-label">Losses</div>
+                    <div class="stat-label"><LocalizedText Key="Losses" /></div>
                     <div class="stat-value losses">@playerStats.Losses</div>
                 </div>
                 <div class="player-stat-box">
-                    <div class="stat-label">Ties</div>
+                    <div class="stat-label"><LocalizedText Key="Ties" /></div>
                     <div class="stat-value ties">@playerStats.Ties</div>
                 </div>
                 <div class="player-stat-box">
-                    <div class="stat-label">Win Rate</div>
+                    <div class="stat-label"><LocalizedText Key="WinRate" /></div>
                     <div class="stat-value">@winRate%</div>
                 </div>
             </div>
         </div>
 
         <div class="partnerships-container">
-            <h3>Partnerships</h3>
+            <h3><LocalizedText Key="Partnerships" /></h3>
             
             <div class="partnership-section">
-                <h4>Won with teammates:</h4>
+                <h4><LocalizedText Key="WonWith" /></h4>
                 @if (partnerships.WonWith.Count > 0)
                 {
                     <div class="partnerships-list">
@@ -60,14 +62,14 @@
                             <div class="partnership-card win-card">
                                 <div class="partnership-details">
                                     <div class="partner-name">@partner.Name</div>
-                                    <div class="partnership-count">@partner.Count wins together</div>
+                                    <div class="partnership-count">@partner.Count <LocalizedText Key="WinsTogether" /></div>
                                 </div>
                                 <div class="partnership-opponents">
                                     @foreach (var opponent in partner.Opponents)
                                     {
                                         <div class="opponent-item">
-                                            <span>vs @opponent.Names</span>
-                                            <span class="opponent-count">@opponent.Count time@(opponent.Count != 1 ? "s" : "")</span>
+                                            <span><LocalizedText Key="VS" /> @opponent.Names</span>
+                                            <span class="opponent-count">@opponent.Count @(opponent.Count == 1 ? Loc.GetString("Time") : Loc.GetString("Times"))</span>
                                         </div>
                                     }
                                 </div>
@@ -77,12 +79,12 @@
                 }
                 else
                 {
-                    <div class="empty-state">No wins with teammates yet</div>
+                    <div class="empty-state"><LocalizedText Key="NoWinsWithTeammates" /></div>
                 }
             </div>
             
             <div class="partnership-section">
-                <h4>Lost with teammates:</h4>
+                <h4><LocalizedText Key="LostWith" /></h4>
                 @if (partnerships.LostWith.Count > 0)
                 {
                     <div class="partnerships-list">
@@ -91,14 +93,14 @@
                             <div class="partnership-card loss-card">
                                 <div class="partnership-details">
                                     <div class="partner-name">@partner.Name</div>
-                                    <div class="partnership-count">@partner.Count losses together</div>
+                                    <div class="partnership-count">@partner.Count <LocalizedText Key="LossesTogether" /></div>
                                 </div>
                                 <div class="partnership-opponents">
                                     @foreach (var opponent in partner.Opponents)
                                     {
                                         <div class="opponent-item">
-                                            <span>vs @opponent.Names</span>
-                                            <span class="opponent-count">@opponent.Count time@(opponent.Count != 1 ? "s" : "")</span>
+                                            <span><LocalizedText Key="VS" /> @opponent.Names</span>
+                                            <span class="opponent-count">@opponent.Count @(opponent.Count == 1 ? Loc.GetString("Time") : Loc.GetString("Times"))</span>
                                         </div>
                                     }
                                 </div>
@@ -108,13 +110,13 @@
                 }
                 else
                 {
-                    <div class="empty-state">No losses with teammates yet</div>
+                    <div class="empty-state"><LocalizedText Key="NoLossesWithTeammates" /></div>
                 }
             </div>
         </div>
 
         <div class="recent-games">
-            <h3>Recent Games</h3>
+            <h3><LocalizedText Key="RecentGames" /></h3>
             <div class="game-cards-container">
                 @foreach (var game in playerGames)
                 {
@@ -124,7 +126,7 @@
                             <div class="team @(IsPlayerInTeamA(game) ? "player-team" : "")">
                                 @game.GroupAFullName
                             </div>
-                            <div class="vs">vs</div>
+                            <div class="vs"><LocalizedText Key="VS" /></div>
                             <div class="team @(!IsPlayerInTeamA(game) ? "player-team" : "")">
                                 @game.GroupBFullName
                             </div>
@@ -155,6 +157,26 @@
         loading = true;
         await LoadData();
         loading = false;
+    }
+
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        
+        base.OnInitialized();
+    }
+
+    private void OnLanguageChanged()
+    {
+        // Update UI when language changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 
     private async Task LoadData()
@@ -304,11 +326,11 @@
         int pointDiff = Math.Abs(playerTeamScore - opponentTeamScore);
         
         if (playerTeamScore == opponentTeamScore)
-            return "Tie game";
+            return Loc.GetString("TieGame");
         else if (playerTeamScore > opponentTeamScore)
-            return $"Won by {pointDiff} points";
+            return $"{Loc.GetString("WonBy")} {pointDiff} {(pointDiff == 1 ? Loc.GetString("PointWord") : Loc.GetString("PointsWord"))}";
         else
-            return $"Lost by {pointDiff} points";
+            return $"{Loc.GetString("LostBy")} {pointDiff} {(pointDiff == 1 ? Loc.GetString("PointWord") : Loc.GetString("PointsWord"))}";
     }
     
     private void ViewGame(int id)

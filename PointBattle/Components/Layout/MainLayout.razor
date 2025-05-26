@@ -1,12 +1,19 @@
 ﻿@inherits LayoutComponentBase
+@using PointBattle.Services
+@inject LocalizationService Loc
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
-<div class="page">
+<div class="page @(Loc.IsRightToLeft ? "rtl-layout" : "")">
     <div class="sidebar">
         <NavMenu />
     </div>
 
     <main>
         <div class="top-row px-4">
+            <button class="language-button" @onclick="ToggleLanguage">
+                @(Loc.CurrentLanguage == "en" ? "کوردی" : "English")
+            </button>
         </div>
 
         <article class="content px-4">
@@ -14,3 +21,61 @@
         </article>
     </main>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Initial direction setup
+            await JSRuntime.InvokeVoidAsync("setDirection", 
+                Loc.IsRightToLeft ? "rtl" : "ltr");
+            Console.WriteLine($"Initial direction set to: {(Loc.IsRightToLeft ? "rtl" : "ltr")}");
+        }
+    }
+
+    private void OnLanguageChanged()
+    {
+        try
+        {
+            // Force a complete UI refresh
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnLanguageChanged: {ex.Message}");
+        }
+    }
+
+    private async Task ToggleLanguage()
+    {
+        try
+        {
+            // Toggle between English and Kurdish
+            string newLanguage = Loc.CurrentLanguage == "en" ? "ckb" : "en";
+            Console.WriteLine($"Toggling language from {Loc.CurrentLanguage} to {newLanguage}");
+            
+            // Save the new language preference
+            await Loc.SetLanguageAsync(newLanguage);
+            
+            // Force a HARD page reload using window.location.href
+            await JSRuntime.InvokeVoidAsync("forcePageReload");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ToggleLanguage: {ex.Message}");
+        }
+    }
+    
+    public void Dispose()
+    {
+        // Unsubscribe from events
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+}
