@@ -38,12 +38,13 @@ public static class MauiProgram
         builder.Services.AddSingleton<LanguageService>();
         
         // Get initial language
-        var savedLanguage = Preferences.Get("language", "en");
+        var savedLanguage = Preferences.Get("app_language", "en");
         
         // Configure supported cultures and set default
         var supportedCultures = new[] { 
             new CultureInfo("en"),
-            new CultureInfo("ckb") // Kurdish Sorani culture code
+            new CultureInfo("ckb-iq"),
+            new CultureInfo("ar") // Added Arabic support
         };
         
         // Set default cultures for the application

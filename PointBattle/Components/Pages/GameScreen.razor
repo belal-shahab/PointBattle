@@ -26,22 +26,23 @@
         <div class="header">
             <h2 class="game-title"><LocalizedText Key="GameInProgress" /></h2>
 
+            <!-- Replace the existing score-container section with this -->
             <div class="score-container">
-                <div class="team-score">
-                    <div class="team-name">@game.GroupAFullName</div>
-                    <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
-                        @game.GroupATotal
+                <div class="scores-row">
+                    <div class="player-section">
+                        <div class="player-name-label">@game.GroupAFullName</div>
+                        <div class="player-score-box @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
+                            @game.GroupATotal
+                        </div>
                     </div>
-                </div>
-
-                <div class="vs-container">
-                    <div class="vs"><LocalizedText Key="VS" /></div>
-                </div>
-
-                <div class="team-score">
-                    <div class="team-name">@game.GroupBFullName</div>
-                    <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
-                        @game.GroupBTotal
+        
+                    <div class="vs-score-separator"><LocalizedText Key="VS"/></div>
+        
+                    <div class="player-section">
+                        <div class="player-name-label">@game.GroupBFullName</div>
+                        <div class="player-score-box @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
+                            @game.GroupBTotal
+                        </div>
                     </div>
                 </div>
             </div>

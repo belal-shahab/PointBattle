@@ -15,12 +15,17 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> <LocalizedText Key="Home" />
+                <span class="nav-icon">🏠</span> <LocalizedText Key="Home" />
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="about">
-                <span class="oi oi-info" aria-hidden="true"></span> <LocalizedText Key="About" />
+                <span class="nav-icon">ℹ️</span> <LocalizedText Key="About" />
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="history">
+                <span class="nav-icon">📊</span> <LocalizedText Key="GameHistory" />
             </NavLink>
         </div>
     </nav>
@@ -29,19 +34,16 @@
 @code {
     protected override void OnInitialized()
     {
-        // Subscribe to language changes
         Loc.OnLanguageChanged += OnLanguageChanged;
     }
 
     private void OnLanguageChanged()
     {
-        // Update UI when language changes
         InvokeAsync(StateHasChanged);
     }
 
     public void Dispose()
     {
-        // Unsubscribe when component is disposed
         Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 }

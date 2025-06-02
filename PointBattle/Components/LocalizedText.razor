@@ -12,11 +12,19 @@
     
     protected override void OnInitialized()
     {
-        Loc.OnLanguageChanged += StateHasChanged;
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+    
+    private void OnLanguageChanged()
+    {
+        // Force component to re-render when language changes
+        InvokeAsync(StateHasChanged);
     }
     
     public void Dispose()
     {
-        Loc.OnLanguageChanged -= StateHasChanged;
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 }

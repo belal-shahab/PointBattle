@@ -9,41 +9,59 @@ namespace PointBattle.Services
     {
         private readonly IJSRuntime _jsRuntime;
         private readonly ResourceManager _resourceManager;
-        private CultureInfo _currentCulture;
+        private CultureInfo _currentCulture = new CultureInfo("en");
+        private bool _isWebViewReady = false;
         
         public event Action OnLanguageChanged;
         
         public CultureInfo CurrentCulture => _currentCulture;
-        public bool IsRightToLeft => _currentCulture.Name == "ckb";
+        public bool IsRightToLeft => _currentCulture.Name.StartsWith("ckb", StringComparison.OrdinalIgnoreCase) || 
+                                     _currentCulture.Name.StartsWith("ar", StringComparison.OrdinalIgnoreCase);
         public string CurrentLanguage => _currentCulture.Name;
+
+        // Available languages
+        public List<LanguageOption> SupportedLanguages => new List<LanguageOption>
+        {
+            new LanguageOption { Code = "en", Name = "English", NativeName = "English", Flag = "🇺🇸" },
+            new LanguageOption { Code = "ckb-iq", Name = "Kurdish", NativeName = "کوردی", Flag = "☀️" },
+            new LanguageOption { Code = "ar", Name = "Arabic", NativeName = "العربية", Flag = "🇸🇦" }
+        };
 
         public LocalizationService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;
             
-            // Initialize ResourceManager for the resource file
             _resourceManager = new ResourceManager(
                 typeof(SharedResource).FullName, 
                 typeof(SharedResource).Assembly);
             
-            // Get saved language preference or use default
-            var savedLanguage = Preferences.Get("language", "en");
+            var savedLanguage = Preferences.Get("app_language", "en");
             _currentCulture = new CultureInfo(savedLanguage);
             
-            // Apply the language
             ApplyLanguage(savedLanguage);
             
             Console.WriteLine($"LocalizationService initialized with language: {savedLanguage}, RTL: {IsRightToLeft}");
+        }
+
+        public async Task InitializeAsync()
+        {
+            try
+            {
+                _isWebViewReady = true;
+                await _jsRuntime.InvokeVoidAsync("setDirection", IsRightToLeft ? "rtl" : "ltr");
+                Console.WriteLine($"WebView initialized with language: {_currentCulture.Name}, RTL: {IsRightToLeft}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error initializing WebView: {ex.Message}");
+            }
         }
         
         public string GetString(string key)
         {
             try
             {
-                // Get localized string from resource manager
                 var localizedString = _resourceManager.GetString(key, _currentCulture);
-                
-                // Return the key itself if not found (helps with debugging)
                 return localizedString ?? $"[{key}]";
             }
             catch (Exception ex)
@@ -55,30 +73,37 @@ namespace PointBattle.Services
         
         public async Task SetLanguageAsync(string languageCode)
         {
-            if (_currentCulture.Name == languageCode)
+            if (_currentCulture.Name.Equals(languageCode, StringComparison.OrdinalIgnoreCase))
                 return;
                 
             try
             {
-                // Update the culture info
+                Console.WriteLine($"=== SETTING LANGUAGE TO: {languageCode} ===");
+                
                 _currentCulture = new CultureInfo(languageCode);
-                
-                // Save language preference
-                Preferences.Set("language", languageCode);
-                
-                // Apply the language change
+                Preferences.Set("app_language", languageCode);
                 ApplyLanguage(languageCode);
-                
-                // Set a localStorage value to indicate a language change was made
-                await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "app_language_changed", "true");
-                
-                // Update document direction
-                await _jsRuntime.InvokeVoidAsync("setDirection", IsRightToLeft ? "rtl" : "ltr");
                 
                 Console.WriteLine($"Language changed to: {languageCode}, RTL: {IsRightToLeft}");
                 
-                // Notify listeners that language has changed
+                if (_isWebViewReady)
+                {
+                    try
+                    {
+                        await _jsRuntime.InvokeVoidAsync("localStorage.setItem", "app_language", languageCode);
+                        await _jsRuntime.InvokeVoidAsync("setDirection", IsRightToLeft ? "rtl" : "ltr");
+                        Console.WriteLine("JavaScript calls completed successfully");
+                    }
+                    catch (Exception jsEx)
+                    {
+                        Console.WriteLine($"JavaScript call failed (but continuing): {jsEx.Message}");
+                    }
+                }
+                
                 OnLanguageChanged?.Invoke();
+                Console.WriteLine("OnLanguageChanged event fired");
+                
+                Console.WriteLine($"=== LANGUAGE CHANGE COMPLETED ===");
             }
             catch (Exception ex)
             {
@@ -91,14 +116,12 @@ namespace PointBattle.Services
         {
             try
             {
-                // Update the current culture
                 var culture = new CultureInfo(languageCode);
                 CultureInfo.CurrentCulture = culture;
                 CultureInfo.CurrentUICulture = culture;
                 CultureInfo.DefaultThreadCurrentCulture = culture;
                 CultureInfo.DefaultThreadCurrentUICulture = culture;
                 
-                // Also update thread cultures
                 Thread.CurrentThread.CurrentCulture = culture;
                 Thread.CurrentThread.CurrentUICulture = culture;
                 
@@ -107,8 +130,7 @@ namespace PointBattle.Services
             catch (Exception ex)
             {
                 Console.WriteLine($"Error applying language {languageCode}: {ex.Message}");
-                // Fallback to English if there was an error
-                if (languageCode != "en")
+                if (!languageCode.Equals("en", StringComparison.OrdinalIgnoreCase))
                 {
                     try
                     {
@@ -127,5 +149,13 @@ namespace PointBattle.Services
                 }
             }
         }
+    }
+
+    public class LanguageOption
+    {
+        public string Code { get; set; }
+        public string Name { get; set; }
+        public string NativeName { get; set; }
+        public string Flag { get; set; }
     }
 }

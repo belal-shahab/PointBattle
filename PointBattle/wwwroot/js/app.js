@@ -1,150 +1,139 @@
-// app.js - COMPLETE REPLACEMENT
 // Set document direction for RTL/LTR
 function setDirection(dir) {
-    console.log(`Setting document direction to: ${dir}`);
-    
-    // Set direction on HTML element
-    document.documentElement.setAttribute('dir', dir);
-    document.documentElement.style.direction = dir;
+    console.log(`JavaScript: Setting document direction to: ${dir}`);
 
-    // Apply additional layout adjustments for RTL/LTR
-    if (dir === 'rtl') {
-        document.body.classList.add('rtl-mode');
-        document.body.classList.remove('ltr-mode');
-    } else {
-        document.body.classList.remove('rtl-mode');
-        document.body.classList.add('ltr-mode');
+    try {
+        // Set direction on HTML element
+        document.documentElement.setAttribute('dir', dir);
+        document.documentElement.style.direction = dir;
+
+        // Apply additional layout adjustments for RTL/LTR
+        if (dir === 'rtl') {
+            document.body.classList.add('rtl-mode');
+            document.body.classList.remove('ltr-mode');
+            document.documentElement.classList.add('rtl');
+        } else {
+            document.body.classList.remove('rtl-mode');
+            document.body.classList.add('ltr-mode');
+            document.documentElement.classList.remove('rtl');
+        }
+
+        // Apply layout adjustments
+        adjustLayoutForDirection(dir);
+
+        // Ensure UI elements stay in correct positions
+        setTimeout(() => {
+            ensureUIElementsPosition(dir);
+        }, 100);
+
+        console.log(`JavaScript: Document direction set to: ${dir}`);
+        return true;
+    } catch (error) {
+        console.error("JavaScript: Error setting direction:", error);
+        return false;
     }
-
-    // Apply any needed layout adjustments
-    adjustLayoutForDirection(dir);
-
-    console.log(`Document direction set to: ${dir}`);
 }
 
 // Handle layout adjustments when direction changes
 function adjustLayoutForDirection(dir) {
-    // Fix input field alignments
-    const inputs = document.querySelectorAll('input');
-    
-    inputs.forEach(input => {
-        if (input.type === 'text' || input.type === 'number') {
+    try {
+        // Fix input field alignments
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+        inputs.forEach(input => {
             input.style.textAlign = (dir === 'rtl') ? 'right' : 'left';
-        }
-    });
+        });
 
-    // Fix button layout
-    const buttonContainers = document.querySelectorAll('.button-container');
-    buttonContainers.forEach(container => {
-        if (dir === 'rtl') {
-            container.style.flexDirection = 'row-reverse';
-        } else {
-            container.style.flexDirection = 'row';
-        }
-    });
-    
-    // Adjust other RTL-specific elements
-    const rtlElements = document.querySelectorAll('.nav-item, .team-score, .round-actions, .game-card-actions');
-    rtlElements.forEach(elem => {
-        if (dir === 'rtl') {
-            elem.classList.add('rtl-direction');
-        } else {
-            elem.classList.remove('rtl-direction');
-        }
-    });
+        // Fix button layout for specific containers only
+        const gameButtonContainers = document.querySelectorAll('.button-container, .modal-actions');
+        gameButtonContainers.forEach(container => {
+            if (dir === 'rtl') {
+                container.style.flexDirection = 'row-reverse';
+            } else {
+                container.style.flexDirection = 'row';
+            }
+        });
+
+        // Adjust RTL-specific elements but NOT navbar or top-row
+        const rtlElements = document.querySelectorAll('.team-score, .round-actions, .game-card-actions');
+        rtlElements.forEach(elem => {
+            if (dir === 'rtl') {
+                elem.classList.add('rtl-direction');
+            } else {
+                elem.classList.remove('rtl-direction');
+            }
+        });
+
+        console.log("Layout adjustments applied");
+
+    } catch (error) {
+        console.error("JavaScript: Error adjusting layout:", error);
+    }
 }
 
-// Set up input focus handling
-function setupInputFocus() {
-    console.log("Setting up input focus handlers");
+// Ensure UI elements stay in correct positions
+function ensureUIElementsPosition(dir) {
+    try {
+        // Keep top-row and navbar elements in fixed positions
+        const topRow = document.querySelector('.top-row');
+        const navbar = document.querySelector('.navbar-toggler');
+        const languageSwitcher = document.querySelector('.language-switcher');
 
-    // Add event listeners for handling viewport adjustments on mobile
-    window.addEventListener('resize', function() {
-        // This will help adjust the view when keyboard appears/disappears on mobile
-        if (document.activeElement.tagName === 'INPUT') {
-            setTimeout(() => document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        if (topRow) {
+            topRow.style.position = 'fixed';
+            topRow.style.top = '0';
+            topRow.style.left = '0';
+            topRow.style.right = '0';
+            topRow.style.zIndex = '200';
         }
 
-        // Reapply RTL/LTR adjustments on resize
-        const dir = document.documentElement.dir || 'ltr';
-        adjustLayoutForDirection(dir);
-    });
-}
+        if (navbar) {
+            navbar.style.position = 'fixed';
+            navbar.style.top = '0.5rem';
+            navbar.style.zIndex = '1002';
 
-// Scroll to input when focused - especially helpful on mobile
-function scrollToInput(inputId) {
-    console.log("Scrolling to input: " + inputId);
+            if (dir === 'rtl') {
+                navbar.style.left = '1rem';
+                navbar.style.right = 'auto';
+            } else {
+                navbar.style.right = '1rem';
+                navbar.style.left = 'auto';
+            }
+        }
 
-    // Scroll to ensure input is visible, especially on mobile
-    const inputElement = document.activeElement;
-    if (inputElement) {
-        setTimeout(() => inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        // Ensure main content has proper padding
+        const main = document.querySelector('main');
+        if (main && window.innerWidth <= 640) {
+            main.style.paddingTop = '3.5rem';
+        }
+
+        console.log("UI elements positioned correctly for direction:", dir);
+
+    } catch (error) {
+        console.error("JavaScript: Error positioning UI elements:", error);
     }
 }
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-    console.log("DOM content loaded - initializing app.js");
-    
-    // Check if we just did a language change
-    if (localStorage.getItem("app_language_changed") === "true") {
-        console.log("Detected completed language change reload");
-        localStorage.removeItem("app_language_changed");
-        
+    console.log("JavaScript: DOM content loaded - initializing app.js");
+
+    try {
         // Get current language and apply appropriate direction
         const savedLanguage = localStorage.getItem("app_language") || "en";
-        const isRtl = savedLanguage === "ckb";
+        const isRtl = savedLanguage.toLowerCase().startsWith("ckb") || savedLanguage.toLowerCase().startsWith("ar");
         setDirection(isRtl ? "rtl" : "ltr");
-        console.log(`Applied direction for language ${savedLanguage}: ${isRtl ? "rtl" : "ltr"}`);
+        console.log(`JavaScript: Applied direction for language ${savedLanguage}: ${isRtl ? "rtl" : "ltr"}`);
+    } catch (error) {
+        console.error("JavaScript: Error during initialization:", error);
     }
-    
-    // Get current direction from HTML element or default to LTR
-    const currentDir = document.documentElement.dir || 'ltr';
-    adjustLayoutForDirection(currentDir);
-    setupInputFocus();
-    
-    console.log("App.js initialization complete");
+
+    console.log("JavaScript: App.js initialization complete");
 });
 
-// Expose function to check if RTL is active - can be called from Blazor
-function isRTLActive() {
-    return document.documentElement.dir === 'rtl';
-}
-
-// Function to change language with proper UI update
-function changeLanguage(languageCode) {
-    console.log(`Changing language to: ${languageCode}`);
-    
-    // First update the direction
-    setDirection(languageCode === 'ckb' ? 'rtl' : 'ltr');
-    
-    // Store the language code for potential use before reload
-    localStorage.setItem('app_language', languageCode);
-    
-    // Return true to indicate success
-    return true;
-}
-
-// Function to force a complete page reload
-function forcePageReload() {
-    console.log("Forcing complete page reload for language change");
-    
-    // Set a flag to indicate we're doing a language change
-    localStorage.setItem("app_language_changed", "true");
-    
-    // Use more aggressive reload approach
-    window.location.href = window.location.href.split('#')[0];
-    
-    // If running in a WebView (MAUI), try additional approaches
-    try {
-        // Adding a small random parameter forces bypass of cache
-        let separator = window.location.href.indexOf('?') > -1 ? '&' : '?';
-        window.location.href = window.location.href.split('#')[0] + 
-                               separator + 
-                               '_refresh=' + new Date().getTime();
-    } catch (e) {
-        console.warn("Failed advanced reload:", e);
-        // Fallback to standard reload
-        window.location.reload(true);
-    }
-}
+// Handle window resize to maintain layout
+window.addEventListener('resize', function() {
+    const currentDir = document.documentElement.getAttribute('dir') || 'ltr';
+    setTimeout(() => {
+        ensureUIElementsPosition(currentDir);
+    }, 100);
+});

@@ -1,8 +1,16 @@
 @page "/about"
 @inject LocalizationService Loc
+@inject NavigationManager Navigation
 @implements IDisposable
 
 <div class="about-container">
+    <div class="back-button-container">
+        <button class="back-button" @onclick="BackToHome">
+            <span>←</span>
+            <LocalizedText Key="Back" />
+        </button>
+    </div>
+
     <h2><LocalizedText Key="About" /></h2>
     
     <div class="about-content">
@@ -32,19 +40,21 @@
 @code {
     protected override void OnInitialized()
     {
-        // Subscribe to language changes
         Loc.OnLanguageChanged += OnLanguageChanged;
     }
 
     private void OnLanguageChanged()
     {
-        // Update UI when language changes
         InvokeAsync(StateHasChanged);
+    }
+
+    private void BackToHome()
+    {
+        Navigation.NavigateTo("/");
     }
 
     public void Dispose()
     {
-        // Unsubscribe when component is disposed
         Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 }
