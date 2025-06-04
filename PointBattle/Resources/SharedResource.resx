@@ -1,0 +1,246 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <data name="AppName" xml:space="preserve">
+    <value>PointBattle</value>
+  </data>
+  <data name="Home" xml:space="preserve">
+    <value>Home</value>
+  </data>
+  <data name="About" xml:space="preserve">
+    <value>About</value>
+  </data>
+  <data name="NewGame" xml:space="preserve">
+    <value>New Game</value>
+  </data>
+  <data name="GameHistory" xml:space="preserve">
+    <value>Game History</value>
+  </data>
+  <data name="Team1" xml:space="preserve">
+    <value>Team 1</value>
+  </data>
+  <data name="Team2" xml:space="preserve">
+    <value>Team 2</value>
+  </data>
+  <data name="Player1" xml:space="preserve">
+    <value>Player 1</value>
+  </data>
+  <data name="Player2" xml:space="preserve">
+    <value>Player 2 (optional)</value>
+  </data>
+  <data name="PlayerName" xml:space="preserve">
+    <value>Player Name</value>
+  </data>
+  <data name="StartGame" xml:space="preserve">
+    <value>Start Game</value>
+  </data>
+  <data name="Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
+  <data name="Round" xml:space="preserve">
+    <value>Round</value>
+  </data>
+  <data name="Rounds" xml:space="preserve">
+    <value>Rounds</value>
+  </data>
+  <data name="Points" xml:space="preserve">
+    <value>Points</value>
+  </data>
+  <data name="AddRound" xml:space="preserve">
+    <value>Add Round</value>
+  </data>
+  <data name="EndGame" xml:space="preserve">
+    <value>End Game</value>
+  </data>
+  <data name="Edit" xml:space="preserve">
+    <value>Edit</value>
+  </data>
+  <data name="Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading...</value>
+  </data>
+  <data name="Wins" xml:space="preserve">
+    <value>Wins</value>
+  </data>
+  <data name="Losses" xml:space="preserve">
+    <value>Losses</value>
+  </data>
+  <data name="Ties" xml:space="preserve">
+    <value>Ties</value>
+  </data>
+  <data name="GameResult" xml:space="preserve">
+    <value>Game Result</value>
+  </data>
+  <data name="WinsExcl" xml:space="preserve">
+    <value>Wins!</value>
+  </data>
+  <data name="ItsATie" xml:space="preserve">
+    <value>It's a Tie!</value>
+  </data>
+  <data name="VS" xml:space="preserve">
+    <value>VS</value>
+  </data>
+  <data name="RoundSummary" xml:space="preserve">
+    <value>Round Summary</value>
+  </data>
+  <data name="NoGamesYet" xml:space="preserve">
+    <value>No games played yet!</value>
+  </data>
+  <data name="TotalGames" xml:space="preserve">
+    <value>Total Games</value>
+  </data>
+  <data name="CompletedGames" xml:space="preserve">
+    <value>Completed Games</value>
+  </data>
+  <data name="InProgress" xml:space="preserve">
+    <value>In Progress</value>
+  </data>
+  <data name="TodaysGames" xml:space="preserve">
+    <value>Today's Games</value>
+  </data>
+  <data name="PlayerStats" xml:space="preserve">
+    <value>Player Statistics</value>
+  </data>
+  <data name="ViewProfile" xml:space="preserve">
+    <value>View Profile</value>
+  </data>
+  <data name="RecentGames" xml:space="preserve">
+    <value>Recent Games</value>
+  </data>
+  <data name="AllGames" xml:space="preserve">
+    <value>All Games</value>
+  </data>
+  <data name="SearchPlayers" xml:space="preserve">
+    <value>Search by player name</value>
+  </data>
+  <data name="GameInProgress" xml:space="preserve">
+    <value>Game in Progress</value>
+  </data>
+  <data name="Max" xml:space="preserve">
+    <value>Max</value>
+  </data>
+  <data name="EditRound" xml:space="preserve">
+    <value>Edit Round</value>
+  </data>
+  <data name="NewRound" xml:space="preserve">
+    <value>New Round</value>
+  </data>
+  <data name="SaveChanges" xml:space="preserve">
+    <value>Save Changes</value>
+  </data>
+  <data name="EditGame" xml:space="preserve">
+    <value>Edit Game</value>
+  </data>
+  <data name="SaveAllChanges" xml:space="preserve">
+    <value>Save All Changes</value>
+  </data>
+  <data name="NoRounds" xml:space="preserve">
+    <value>No rounds in this game.</value>
+  </data>
+  <data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+  <data name="GameDashboard" xml:space="preserve">
+    <value>Game Dashboard</value>
+  </data>
+  <data name="NoGamesToday" xml:space="preserve">
+    <value>No games played today.</value>
+  </data>
+  <data name="WinRate" xml:space="preserve">
+    <value>Win Rate</value>
+  </data>
+  <data name="TotalPoints" xml:space="preserve">
+    <value>Total Points</value>
+  </data>
+  <data name="ProfileOf" xml:space="preserve">
+    <value>'s Profile</value>
+  </data>
+  <data name="Games" xml:space="preserve">
+    <value>Games</value>
+  </data>
+  <data name="Partnerships" xml:space="preserve">
+    <value>Partnerships</value>
+  </data>
+  <data name="WonWith" xml:space="preserve">
+    <value>Won with teammates:</value>
+  </data>
+  <data name="LostWith" xml:space="preserve">
+    <value>Lost with teammates:</value>
+  </data>
+  <data name="NoWinsWithTeammates" xml:space="preserve">
+    <value>No wins with teammates yet</value>
+  </data>
+  <data name="NoLossesWithTeammates" xml:space="preserve">
+    <value>No losses with teammates yet</value>
+  </data>
+  <data name="WinsTogether" xml:space="preserve">
+    <value>wins together</value>
+  </data>
+  <data name="LossesTogether" xml:space="preserve">
+    <value>losses together</value>
+  </data>
+  <data name="Time" xml:space="preserve">
+    <value>time</value>
+  </data>
+  <data name="Times" xml:space="preserve">
+    <value>times</value>
+  </data>
+  <data name="TieGame" xml:space="preserve">
+    <value>Tie game</value>
+  </data>
+  <data name="WonBy" xml:space="preserve">
+    <value>Won by</value>
+  </data>
+  <data name="LostBy" xml:space="preserve">
+    <value>Lost by</value>
+  </data>
+  <data name="PointsWord" xml:space="preserve">
+    <value>points</value>
+  </data>
+  <data name="PointWord" xml:space="preserve">
+    <value>point</value>
+  </data>
+  <data name="BackToHistory" xml:space="preserve">
+    <value>Back to History</value>
+  </data>
+  <data name="LeadsBy" xml:space="preserve">
+    <value>leads by</value>
+  </data>
+  <data name="TeamsAreTied" xml:space="preserve">
+    <value>Teams are tied</value>
+  </data>
+  <data name="RoundOf" xml:space="preserve">
+    <value>Round</value>
+  </data>
+  <data name="Of" xml:space="preserve">
+    <value>of</value>
+  </data>
+  <data name="HasAlreadyWon" xml:space="preserve">
+    <value>has already won!</value>
+  </data>
+  <data name="Needs" xml:space="preserve">
+    <value>needs</value>
+  </data>
+  <data name="ButOnly" xml:space="preserve">
+    <value>but only</value>
+  </data>
+  <data name="ArePossibleInRemainingRounds" xml:space="preserve">
+    <value>are possible in remaining rounds.</value>
+  </data>
+  <data name="ClickToViewDetail" xml:space="preserve">
+    <value>Click on a player to view their detailed profile</value>
+  </data>
+  <data name="SeeAllGames" xml:space="preserve">
+    <value>See All Games</value>
+  </data>
+  <data name="test" xml:space="preserve">
+    <value>Track your game points with friends!</value>
+  </data>
+</root>

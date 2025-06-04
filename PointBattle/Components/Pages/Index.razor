@@ -1,19 +1,37 @@
 @page "/"
 @inject NavigationManager Navigation
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="main-container">
     <div class="title">
-        <h1>PointBattle</h1>
-        <p>Track your game points with friends!</p>
+        <h1><LocalizedText Key="AppName" /></h1>
+        <p><LocalizedText Key="test" /></p>
     </div>
     
     <div class="button-container">
-        <button class="btn primary" @onclick="NewGame">New Game</button>
-        <button class="btn secondary" @onclick="ViewHistory">Game History</button>
+        <button class="btn primary" @onclick="NewGame"><LocalizedText Key="NewGame" /></button>
+        <button class="btn secondary" @onclick="ViewHistory"><LocalizedText Key="GameHistory" /></button>
+        <button class="btn info" @onclick="ViewAbout">ℹ️ <LocalizedText Key="About" /></button>
     </div>
 </div>
 
 @code {
+    protected override void OnInitialized()
+    {
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+
     private void NewGame()
     {
         Navigation.NavigateTo("/newgame");
@@ -22,5 +40,10 @@
     private void ViewHistory()
     {
         Navigation.NavigateTo("/history");
+    }
+
+    private void ViewAbout()
+    {
+        Navigation.NavigateTo("/about");
     }
 }

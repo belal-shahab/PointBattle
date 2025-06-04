@@ -1,16 +1,70 @@
 ﻿@inherits LayoutComponentBase
+@using PointBattle.Services
+@using PointBattle.Components
+@inject LocalizationService Loc
+@inject IJSRuntime JSRuntime
+@implements IDisposable
 
-<div class="page">
+<div class="page @(Loc.IsRightToLeft ? "rtl-layout" : "")">
     <div class="sidebar">
         <NavMenu />
     </div>
-
     <main>
-        <div class="top-row px-4">
+        <div class="top-row">
+            <div class="top-row-content">
+                <div class="app-brand">
+                    <LocalizedText Key="AppName" />
+                </div>
+                <!-- Language switcher moved to a better position -->
+                <div class="language-switcher-container">
+                    <LanguageSwitcher />
+                </div>
+            </div>
         </div>
-
-        <article class="content px-4">
+        <article class="content">
             @Body
         </article>
     </main>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        Console.WriteLine($"MainLayout initialized with language: {Loc.CurrentLanguage}");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            try
+            {
+                await Loc.InitializeAsync();
+                StateHasChanged();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error in OnAfterRenderAsync: {ex.Message}");
+            }
+        }
+    }
+
+    private void OnLanguageChanged()
+    {
+        try
+        {
+            Console.WriteLine("Language changed event received in MainLayout");
+            InvokeAsync(StateHasChanged);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnLanguageChanged: {ex.Message}");
+        }
+    }
+    
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+}

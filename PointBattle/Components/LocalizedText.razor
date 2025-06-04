@@ -1,0 +1,30 @@
+@inject PointBattle.Services.LocalizationService Loc
+@implements IDisposable
+
+<span class="@AdditionalClass">@Loc.GetString(Key)</span>
+
+@code {
+    [Parameter]
+    public string Key { get; set; }
+    
+    [Parameter]
+    public string AdditionalClass { get; set; } = "";
+    
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+    
+    private void OnLanguageChanged()
+    {
+        // Force component to re-render when language changes
+        InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+}

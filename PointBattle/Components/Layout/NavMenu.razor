@@ -1,6 +1,11 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@using Microsoft.Extensions.Localization
+@using PointBattle.Resources
+@inject LocalizationService Loc
+@implements IDisposable
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
-        <a class="navbar-brand" href="">PointBattle</a>
+        <a class="navbar-brand" href=""><LocalizedText Key="AppName" /></a>
     </div>
 </div>
 
@@ -10,13 +15,35 @@
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+                <span class="nav-icon">🏠</span> <LocalizedText Key="Home" />
             </NavLink>
         </div>
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="about">
-                <span class="oi oi-info" aria-hidden="true"></span> About
+                <span class="nav-icon">ℹ️</span> <LocalizedText Key="About" />
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="history">
+                <span class="nav-icon">📊</span> <LocalizedText Key="GameHistory" />
             </NavLink>
         </div>
     </nav>
 </div>
+
+@code {
+    protected override void OnInitialized()
+    {
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+}

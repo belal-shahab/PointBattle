@@ -3,22 +3,38 @@
 @using PointBattle.Services
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="result-container">
-    <h2>Game Result</h2>
+    <div class="back-button-container">
+        <button class="back-button" @onclick="BackToHome">
+            <span>←</span>
+            <LocalizedText Key="Back" />
+        </button>
+    </div>
 
-    <div class="final-score">
-        <div class="team">
-            <h3>@game.GroupA</h3>
-            <div class="points @(game.GroupATotal > game.GroupBTotal ? "winner" : "")">
-                @game.GroupATotal
+    <div class="game-result-header">
+        <h2><LocalizedText Key="GameResult" /></h2>
+    </div>
+
+    <div class="players-scores-container">
+        <!-- Scores Row with Names Above -->
+        <div class="scores-row">
+            <div class="player-section">
+                <div class="player-name-label">@game.GroupA</div>
+                <div class="player-score-box @(game.GroupATotal > game.GroupBTotal ? "winner-score" : "")">
+                    @game.GroupATotal
+                </div>
             </div>
-        </div>
-        <div class="vs">VS</div>
-        <div class="team">
-            <h3>@game.GroupB</h3>
-            <div class="points @(game.GroupBTotal > game.GroupATotal ? "winner" : "")">
-                @game.GroupBTotal
+            
+            <div class="vs-score-separator"><LocalizedText Key="VS"/></div>
+            
+            <div class="player-section">
+                <div class="player-name-label">@game.GroupB</div>
+                <div class="player-score-box @(game.GroupBTotal > game.GroupATotal ? "winner-score" : "")">
+                    @game.GroupBTotal
+                </div>
             </div>
         </div>
     </div>
@@ -26,29 +42,29 @@
     @if (game.GroupATotal > game.GroupBTotal)
     {
         <div class="winner-announcement">
-            <h2 class="winner-text">@game.GroupA Wins!</h2>
+            <h2 class="winner-text">🎉 @game.GroupA <LocalizedText Key="WinsExcl" /></h2>
         </div>
     }
     else if (game.GroupBTotal > game.GroupATotal)
     {
         <div class="winner-announcement">
-            <h2 class="winner-text">@game.GroupB Wins!</h2>
+            <h2 class="winner-text">🎉 @game.GroupB <LocalizedText Key="WinsExcl" /></h2>
         </div>
     }
     else
     {
-        <div class="winner-announcement">
-            <h2 class="winner-text">It's a Tie!</h2>
+        <div class="winner-announcement tie-announcement">
+            <h2 class="winner-text">🤝 <LocalizedText Key="ItsATie" /></h2>
         </div>
     }
 
     <div class="round-summary">
-        <h3>Round Summary</h3>
+        <h3><LocalizedText Key="RoundSummary" /></h3>
         <div class="rounds-table">
             <table>
                 <thead>
                 <tr>
-                    <th>Round</th>
+                    <th><LocalizedText Key="Round" /></th>
                     <th>@game.GroupA</th>
                     <th>@game.GroupB</th>
                 </tr>
@@ -57,7 +73,7 @@
                 @foreach (var round in game.Rounds)
                 {
                     <tr>
-                        <td>Round @round.RoundNumber</td>
+                        <td><LocalizedText Key="Round" /> @round.RoundNumber</td>
                         <td>@round.GroupAPoints</td>
                         <td>@round.GroupBPoints</td>
                     </tr>
@@ -67,41 +83,41 @@
         </div>
     </div>
 
-    <div class="button-container">
-        <button class="btn secondary" @onclick="BackToHome">Home</button>
-        <button class="btn warning" @onclick="NavigateToEditGame">Edit Game</button>
-        <button class="btn primary" @onclick="NewGame">New Game</button>
+    <div class="button-container rtl-direction">
+        <button class="btn secondary" @onclick="BackToHome"><LocalizedText Key="Home" /></button>
+        <button class="btn warning" @onclick="NavigateToEditGame"><LocalizedText Key="Edit" /></button>
+        <button class="btn primary" @onclick="NewGame"><LocalizedText Key="NewGame" /></button>
     </div>
     
     @if (isEditing)
     {
         <div class="modal-overlay" @onclick="CancelEdit">
             <div class="modal" @onclick:stopPropagation="true">
-                <h3>Edit Game</h3>
+                <h3><LocalizedText Key="EditGame" /></h3>
             
                 <div class="input-group">
-                    <label>Team 1 Player:</label>
+                    <label><LocalizedText Key="Team1" /> <LocalizedText Key="Player1" />:</label>
                     <input type="text" @bind="editedGame.GroupA" />
                 </div>
             
                 <div class="input-group">
-                    <label>Team 1 Player 2 (Optional):</label>
+                    <label><LocalizedText Key="Team1" /> <LocalizedText Key="Player2" />:</label>
                     <input type="text" @bind="editedGame.GroupAMember2" />
                 </div>
             
                 <div class="input-group">
-                    <label>Team 2 Player:</label>
+                    <label><LocalizedText Key="Team2" /> <LocalizedText Key="Player1" />:</label>
                     <input type="text" @bind="editedGame.GroupB" />
                 </div>
             
                 <div class="input-group">
-                    <label>Team 2 Player 2 (Optional):</label>
+                    <label><LocalizedText Key="Team2" /> <LocalizedText Key="Player2" />:</label>
                     <input type="text" @bind="editedGame.GroupBMember2" />
                 </div>
             
-                <div class="modal-actions">
-                    <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
-                    <button class="btn primary" @onclick="SaveEdit">Save</button>
+                <div class="modal-actions rtl-direction">
+                    <button class="btn secondary" @onclick="CancelEdit"><LocalizedText Key="Cancel" /></button>
+                    <button class="btn primary" @onclick="SaveEdit"><LocalizedText Key="Save" /></button>
                 </div>
             </div>
         </div>
@@ -119,9 +135,9 @@
     {
         Navigation.NavigateTo($"/editgame/{Id}");
     }
+    
     private void EditGame()
     {
-        // Create a copy of the game to edit
         editedGame = new Game
         {
             Id = game.Id,
@@ -146,16 +162,9 @@
     {
         try
         {
-            // Keep the rounds reference
             editedGame.Rounds = game.Rounds;
-        
-            // Save the edited game
             await DbService.SaveGameAsync(editedGame);
-        
-            // Refresh the game data
             game = await DbService.GetGameAsync(Id) ?? new Game();
-        
-            // Close the modal
             isEditing = false;
         }
         catch (Exception ex)
@@ -163,6 +172,7 @@
             Console.WriteLine($"Error saving game edit: {ex.Message}");
         }
     }
+    
     protected override async Task OnInitializedAsync()
     {
         game = await DbService.GetGameAsync(Id) ?? new Game();
@@ -178,11 +188,24 @@
         Navigation.NavigateTo("/newgame", forceLoad: true);
     }
     
-    
-    
     private async Task FinishEdit()
     {
         isEditing = false;
         game = await DbService.GetGameAsync(Id) ?? new Game();
+    }
+
+    protected override void OnInitialized()
+    {
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 }

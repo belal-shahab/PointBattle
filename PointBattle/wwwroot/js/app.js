@@ -1,30 +1,139 @@
-// Input focus handling for mobile and desktop
-function setupInputFocus() {
-    console.log("Setting up input focus handlers");
+// Set document direction for RTL/LTR
+function setDirection(dir) {
+    console.log(`JavaScript: Setting document direction to: ${dir}`);
 
-    // Add event listeners for handling viewport adjustments on mobile
-    window.addEventListener('resize', function() {
-        // This will help adjust the view when keyboard appears/disappears on mobile
-        if (document.activeElement.tagName === 'INPUT') {
-            setTimeout(() => document.activeElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+    try {
+        // Set direction on HTML element
+        document.documentElement.setAttribute('dir', dir);
+        document.documentElement.style.direction = dir;
+
+        // Apply additional layout adjustments for RTL/LTR
+        if (dir === 'rtl') {
+            document.body.classList.add('rtl-mode');
+            document.body.classList.remove('ltr-mode');
+            document.documentElement.classList.add('rtl');
+        } else {
+            document.body.classList.remove('rtl-mode');
+            document.body.classList.add('ltr-mode');
+            document.documentElement.classList.remove('rtl');
         }
-    });
-}
 
-// Scroll to input when focused - especially helpful on mobile
-function scrollToInput(inputId) {
-    console.log("Scrolling to input: " + inputId);
+        // Apply layout adjustments
+        adjustLayoutForDirection(dir);
 
-    // Scroll to ensure input is visible, especially on mobile
-    const inputElement = document.activeElement;
-    if (inputElement) {
-        setTimeout(() => inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
+        // Ensure UI elements stay in correct positions
+        setTimeout(() => {
+            ensureUIElementsPosition(dir);
+        }, 100);
+
+        console.log(`JavaScript: Document direction set to: ${dir}`);
+        return true;
+    } catch (error) {
+        console.error("JavaScript: Error setting direction:", error);
+        return false;
     }
 }
 
-// Clear default value from input field
-function clearInputValue(inputElement) {
-    if (inputElement && inputElement.value === "0") {
-        inputElement.value = "";
+// Handle layout adjustments when direction changes
+function adjustLayoutForDirection(dir) {
+    try {
+        // Fix input field alignments
+        const inputs = document.querySelectorAll('input[type="text"], input[type="number"], textarea');
+        inputs.forEach(input => {
+            input.style.textAlign = (dir === 'rtl') ? 'right' : 'left';
+        });
+
+        // Fix button layout for specific containers only
+        const gameButtonContainers = document.querySelectorAll('.button-container, .modal-actions');
+        gameButtonContainers.forEach(container => {
+            if (dir === 'rtl') {
+                container.style.flexDirection = 'row-reverse';
+            } else {
+                container.style.flexDirection = 'row';
+            }
+        });
+
+        // Adjust RTL-specific elements but NOT navbar or top-row
+        const rtlElements = document.querySelectorAll('.team-score, .round-actions, .game-card-actions');
+        rtlElements.forEach(elem => {
+            if (dir === 'rtl') {
+                elem.classList.add('rtl-direction');
+            } else {
+                elem.classList.remove('rtl-direction');
+            }
+        });
+
+        console.log("Layout adjustments applied");
+
+    } catch (error) {
+        console.error("JavaScript: Error adjusting layout:", error);
     }
 }
+
+// Ensure UI elements stay in correct positions
+function ensureUIElementsPosition(dir) {
+    try {
+        // Keep top-row and navbar elements in fixed positions
+        const topRow = document.querySelector('.top-row');
+        const navbar = document.querySelector('.navbar-toggler');
+        const languageSwitcher = document.querySelector('.language-switcher');
+
+        if (topRow) {
+            topRow.style.position = 'fixed';
+            topRow.style.top = '0';
+            topRow.style.left = '0';
+            topRow.style.right = '0';
+            topRow.style.zIndex = '200';
+        }
+
+        if (navbar) {
+            navbar.style.position = 'fixed';
+            navbar.style.top = '0.5rem';
+            navbar.style.zIndex = '1002';
+
+            if (dir === 'rtl') {
+                navbar.style.left = '1rem';
+                navbar.style.right = 'auto';
+            } else {
+                navbar.style.right = '1rem';
+                navbar.style.left = 'auto';
+            }
+        }
+
+        // Ensure main content has proper padding
+        const main = document.querySelector('main');
+        if (main && window.innerWidth <= 640) {
+            main.style.paddingTop = '3.5rem';
+        }
+
+        console.log("UI elements positioned correctly for direction:", dir);
+
+    } catch (error) {
+        console.error("JavaScript: Error positioning UI elements:", error);
+    }
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("JavaScript: DOM content loaded - initializing app.js");
+
+    try {
+        // Get current language and apply appropriate direction
+        const savedLanguage = localStorage.getItem("app_language") || "en";
+        const isRtl = savedLanguage.toLowerCase().startsWith("ckb") || savedLanguage.toLowerCase().startsWith("ar");
+        setDirection(isRtl ? "rtl" : "ltr");
+        console.log(`JavaScript: Applied direction for language ${savedLanguage}: ${isRtl ? "rtl" : "ltr"}`);
+    } catch (error) {
+        console.error("JavaScript: Error during initialization:", error);
+    }
+
+    console.log("JavaScript: App.js initialization complete");
+});
+
+// Handle window resize to maintain layout
+window.addEventListener('resize', function() {
+    const currentDir = document.documentElement.getAttribute('dir') || 'ltr';
+    setTimeout(() => {
+        ensureUIElementsPosition(currentDir);
+    }, 100);
+});

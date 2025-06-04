@@ -1,0 +1,104 @@
+@using PointBattle.Services
+@inject LocalizationService Loc
+@implements IDisposable
+
+<div class="mobile-language-switcher">
+    <button class="mobile-language-button" @onclick="ToggleDropdown" @onclick:stopPropagation="true">
+        <span class="current-flag">@GetCurrentLanguageFlag()</span>
+    </button>
+    
+    @if (showDropdown)
+    {
+        <div class="mobile-language-modal">
+            <div class="modal-header">
+                <h3>Select Language</h3>
+                <button class="close-button" @onclick="CloseDropdown">✕</button>
+            </div>
+            <div class="language-list">
+                @foreach (var language in Loc.SupportedLanguages)
+                {
+                    <button class="mobile-language-option @(IsCurrentLanguage(language.Code) ? "active" : "")" 
+                            @onclick="() => SelectLanguage(language.Code)"
+                            @onclick:stopPropagation="true">
+                        <span class="language-flag">@language.Flag</span>
+                        <div class="language-details">
+                            <div class="language-name">@language.Name</div>
+                            <div class="language-native">@language.NativeName</div>
+                        </div>
+                        @if (IsCurrentLanguage(language.Code))
+                        {
+                            <span class="selected-icon">✓</span>
+                        }
+                    </button>
+                }
+            </div>
+        </div>
+        <div class="modal-backdrop" @onclick="CloseDropdown"></div>
+    }
+</div>
+
+@code {
+    private bool showDropdown = false;
+    private bool isChangingLanguage = false;
+
+    protected override void OnInitialized()
+    {
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        isChangingLanguage = false;
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void ToggleDropdown()
+    {
+        if (!isChangingLanguage)
+        {
+            showDropdown = !showDropdown;
+        }
+    }
+
+    private void CloseDropdown()
+    {
+        showDropdown = false;
+    }
+
+    private async Task SelectLanguage(string languageCode)
+    {
+        if (!IsCurrentLanguage(languageCode) && !isChangingLanguage)
+        {
+            isChangingLanguage = true;
+            showDropdown = false;
+            StateHasChanged();
+            
+            try
+            {
+                await Loc.SetLanguageAsync(languageCode);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error changing language: {ex.Message}");
+                isChangingLanguage = false;
+            }
+        }
+    }
+
+    private bool IsCurrentLanguage(string languageCode)
+    {
+        return Loc.CurrentLanguage.Equals(languageCode, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private string GetCurrentLanguageFlag()
+    {
+        var currentLang = Loc.SupportedLanguages.FirstOrDefault(l => 
+            l.Code.Equals(Loc.CurrentLanguage, StringComparison.OrdinalIgnoreCase));
+        return currentLang?.Flag ?? "🌐";
+    }
+
+    public void Dispose()
+    {
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+}

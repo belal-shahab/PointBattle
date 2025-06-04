@@ -3,32 +3,34 @@
 @using PointBattle.Services
 @inject NavigationManager Navigation
 @inject DatabaseService DbService
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="container">
-    <h2>New Game</h2>
+    <h2><LocalizedText Key="NewGame" /></h2>
 
     <div class="teams-container">
         <div class="team-setup">
-            <h3>Team 1</h3>
+            <h3><LocalizedText Key="Team1" /></h3>
             <div class="form-group">
-                <label>Player 1:</label>
-                <input list="player-names" @bind="groupAName" placeholder="Player Name"/>
+                <label><LocalizedText Key="Player1" />:</label>
+                <input list="player-names" @bind="groupAName" placeholder="@Loc.GetString("PlayerName")"/>
             </div>
             <div class="form-group">
-                <label>Player 2 (optional):</label>
-                <input list="player-names" @bind="groupAMember2" placeholder="Player Name"/>
+                <label><LocalizedText Key="Player2" />:</label>
+                <input list="player-names" @bind="groupAMember2" placeholder="@Loc.GetString("PlayerName")"/>
             </div>
         </div>
 
         <div class="team-setup">
-            <h3>Team 2</h3>
+            <h3><LocalizedText Key="Team2" /></h3>
             <div class="form-group">
-                <label>Player 1:</label>
-                <input list="player-names" @bind="groupBName" placeholder="Player Name"/>
+                <label><LocalizedText Key="Player1" />:</label>
+                <input list="player-names" @bind="groupBName" placeholder="@Loc.GetString("PlayerName")"/>
             </div>
             <div class="form-group">
-                <label>Player 2 (optional):</label>
-                <input list="player-names" @bind="groupBMember2" placeholder="Player Name"/>
+                <label><LocalizedText Key="Player2" />:</label>
+                <input list="player-names" @bind="groupBMember2" placeholder="@Loc.GetString("PlayerName")"/>
             </div>
         </div>
     </div>
@@ -41,8 +43,8 @@
     </datalist>
 
     <div class="button-container">
-        <button class="btn secondary" @onclick="Cancel">Cancel</button>
-        <button class="btn primary" @onclick="StartGame">Start Game</button>
+        <button class="btn secondary" @onclick="Cancel"><LocalizedText Key="Cancel" /></button>
+        <button class="btn primary" @onclick="StartGame"><LocalizedText Key="StartGame" /></button>
     </div>
 </div>
 
@@ -56,6 +58,24 @@
     protected override async Task OnInitializedAsync()
     {
         playerNames = await DbService.GetAllPlayerNamesAsync();
+    }
+    
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+    }
+
+    private void OnLanguageChanged()
+    {
+        // Update UI when language changes
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
     }
     
     private void Cancel()
@@ -79,7 +99,6 @@
         // Save to database
         var id = await DbService.SaveGameAsync(game);
         
-
         // Now if we have a valid ID, navigate to the game screen
         if (id > 0)
         {
@@ -91,5 +110,4 @@
             Console.WriteLine("Error: Failed to create new game");
         }
     }
-
 }

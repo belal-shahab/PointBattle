@@ -4,42 +4,45 @@
 @inject DatabaseService DbService
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
+@inject LocalizationService Loc
+@implements IDisposable
 
 <div class="game-container">
     @if (loading)
     {
         <div class="loading">
-            <p>Loading game data...</p>
+            <p><LocalizedText Key="Loading" /></p>
         </div>
     }
     else if (loadError)
     {
         <div class="alert alert-danger">
             <p>Error loading game: @errorMessage</p>
-            <button class="btn primary" @onclick="BackToHome">Back to Home</button>
+            <button class="btn primary" @onclick="BackToHome"><LocalizedText Key="Back" /></button>
         </div>
     }
     else
     {
         <div class="header">
-            <h2 class="game-title">Game in Progress</h2>
+            <h2 class="game-title"><LocalizedText Key="GameInProgress" /></h2>
 
+            <!-- Replace the existing score-container section with this -->
             <div class="score-container">
-                <div class="team-score">
-                    <div class="team-name">@game.GroupAFullName</div>
-                    <div class="score @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
-                        @game.GroupATotal
+                <div class="scores-row">
+                    <div class="player-section">
+                        <div class="player-name-label">@game.GroupAFullName</div>
+                        <div class="player-score-box @(game.GroupATotal > game.GroupBTotal ? "winning" : "")">
+                            @game.GroupATotal
+                        </div>
                     </div>
-                </div>
-
-                <div class="vs-container">
-                    <div class="vs">VS</div>
-                </div>
-
-                <div class="team-score">
-                    <div class="team-name">@game.GroupBFullName</div>
-                    <div class="score @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
-                        @game.GroupBTotal
+        
+                    <div class="vs-score-separator"><LocalizedText Key="VS"/></div>
+        
+                    <div class="player-section">
+                        <div class="player-name-label">@game.GroupBFullName</div>
+                        <div class="player-score-box @(game.GroupBTotal > game.GroupATotal ? "winning" : "")">
+                            @game.GroupBTotal
+                        </div>
                     </div>
                 </div>
             </div>
@@ -53,14 +56,14 @@
             {
                 <div class="point-difference-display">
                     <div class="point-difference-text">
-                        @leadingTeam @(pointDifference > 0 ? "leads by" : "leads by") <span class="point-difference-number">@Math.Abs(pointDifference)</span> point@(Math.Abs(pointDifference) != 1 ? "s" : "")
+                        @leadingTeam <LocalizedText Key="LeadsBy" /> <span class="point-difference-number">@Math.Abs(pointDifference)</span> @(Math.Abs(pointDifference) != 1 ? Loc.GetString("PointsWord") : Loc.GetString("PointWord"))
                     </div>
                 </div>
             }
             else if (game.Rounds.Count > 0)
             {
                 <div class="point-difference-display tie">
-                    <div class="point-difference-text">Teams are tied</div>
+                    <div class="point-difference-text"><LocalizedText Key="TeamsAreTied" /></div>
                 </div>
             }
 
@@ -69,37 +72,37 @@
                 @if (game.IsGroupAWinConfirmed())
                 {
                     <div class="alert alert-success">
-                        <strong>@game.GroupA has already won!</strong>
-                        @game.GroupB needs @game.PointsNeededForGroupB() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
+                        <strong>@game.GroupA <LocalizedText Key="HasAlreadyWon" /></strong>
+                        @game.GroupB <LocalizedText Key="Needs" /> @game.PointsNeededForGroupB() <LocalizedText Key="PointsWord" /> <LocalizedText Key="ButOnly" /> @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) <LocalizedText Key="ArePossibleInRemainingRounds" />
                     </div>
                 }
                 else if (game.IsGroupBWinConfirmed())
                 {
                     <div class="alert alert-success">
-                        <strong>@game.GroupB has already won!</strong>
-                        @game.GroupA needs @game.PointsNeededForGroupA() points but only @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) are possible in remaining rounds.
+                        <strong>@game.GroupB <LocalizedText Key="HasAlreadyWon" /></strong>
+                        @game.GroupA <LocalizedText Key="Needs" /> @game.PointsNeededForGroupA() <LocalizedText Key="PointsWord" /> <LocalizedText Key="ButOnly" /> @((Game.MaxRounds - game.Rounds.Count) * Game.MaxPointsPerRound) <LocalizedText Key="ArePossibleInRemainingRounds" />
                     </div>
                 }
             }
 
             <div class="round-counter">
-                Round @(game.Rounds.Count) of @Game.MaxRounds
+                <LocalizedText Key="RoundOf" /> @(game.Rounds.Count) <LocalizedText Key="Of" /> @Game.MaxRounds
             </div>
         </div>
 
         <div class="rounds-container">
-            <h3>Rounds</h3>
+            <h3><LocalizedText Key="Rounds" /></h3>
             @foreach (var round in game.Rounds)
             {
                 <div class="round">
-                    <div class="round-header">Round @round.RoundNumber</div>
+                    <div class="round-header"><LocalizedText Key="Round" /> @round.RoundNumber</div>
                     <div class="round-scores">
                         <div class="round-score">@round.GroupAPoints</div>
                         <div class="round-score">@round.GroupBPoints</div>
                     </div>
                     <div class="round-actions">
-                        <button class="edit-button" @onclick="() => NavigateToEditRound(round)">Edit</button>
-                        <button class="delete-button" @onclick="() => DeleteRound(round)">Delete</button>
+                        <button class="edit-button" @onclick="() => NavigateToEditRound(round)"><LocalizedText Key="Edit" /></button>
+                        <button class="delete-button" @onclick="() => DeleteRound(round)"><LocalizedText Key="Delete" /></button>
                     </div>
                 </div>
             }
@@ -108,7 +111,7 @@
         @if (game.Rounds.Count < Game.MaxRounds && !game.IsCompleted)
         {
             <div class="new-round" id="new-round-section">
-                <h3>New Round</h3>
+                <h3><LocalizedText Key="NewRound" /></h3>
                 <div class="input-group">
                     <label>@game.GroupA</label>
                     <input type="number" 
@@ -117,7 +120,7 @@
                            @onchange="e => newRoundA = int.Parse(e.Value.ToString())"
                            max="@Game.MaxPointsPerRound"
                            @ref="teamAInputRef"/>
-                    <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+                    <span class="helper-text"><LocalizedText Key="Max" />: @Game.MaxPointsPerRound</span>
                 </div>
                 <div class="input-group">
                     <label>@game.GroupB</label>
@@ -127,9 +130,9 @@
                            @onchange="e => newRoundB = int.Parse(e.Value.ToString())"
                            max="@Game.MaxPointsPerRound"
                            @ref="teamBInputRef"/>
-                    <span class="helper-text">Max: @Game.MaxPointsPerRound</span>
+                    <span class="helper-text"><LocalizedText Key="Max" />: @Game.MaxPointsPerRound</span>
                 </div>
-                <button class="btn primary" @onclick="AddRound">Add Round</button>
+                <button class="btn primary" @onclick="AddRound"><LocalizedText Key="AddRound" /></button>
             </div>
         }
 
@@ -137,7 +140,7 @@
         {
             <div class="modal-overlay" @onclick="CancelEdit">
                 <div class="modal" @onclick:stopPropagation="true">
-                    <h3>Edit Round @editingRound.RoundNumber</h3>
+                    <h3><LocalizedText Key="EditRound" /> @editingRound.RoundNumber</h3>
                     <div class="input-group">
                         <label>@game.GroupA</label>
                         <input type="number" @bind="editingRoundA" min="0" max="@Game.MaxPointsPerRound"/>
@@ -147,16 +150,16 @@
                         <input type="number" @bind="editingRoundB" min="0" max="@Game.MaxPointsPerRound"/>
                     </div>
                     <div class="modal-actions">
-                        <button class="btn secondary" @onclick="CancelEdit">Cancel</button>
-                        <button class="btn primary" @onclick="SaveEdit">Save</button>
+                        <button class="btn secondary" @onclick="CancelEdit"><LocalizedText Key="Cancel" /></button>
+                        <button class="btn primary" @onclick="SaveEdit"><LocalizedText Key="Save" /></button>
                     </div>
                 </div>
             </div>
         }
 
         <div class="actions">
-            <button class="btn secondary" @onclick="BackToHome">Home</button>
-            <button class="btn warning" @onclick="FinishGame">End Game</button>
+            <button class="btn secondary" @onclick="BackToHome"><LocalizedText Key="Home" /></button>
+            <button class="btn warning" @onclick="FinishGame"><LocalizedText Key="EndGame" /></button>
         </div>
     }
 </div>
@@ -180,10 +183,30 @@
     private bool teamAInputClicked = false;
     private bool teamBInputClicked = false;
     
+    protected override void OnInitialized()
+    {
+        // Subscribe to language changes
+        Loc.OnLanguageChanged += OnLanguageChanged;
+        base.OnInitialized();
+    }
+    
+    private void OnLanguageChanged()
+    {
+        // Force UI update when language changes
+        InvokeAsync(StateHasChanged);
+    }
+    
+    public void Dispose()
+    {
+        // Unsubscribe when component is disposed
+        Loc.OnLanguageChanged -= OnLanguageChanged;
+    }
+
     private void NavigateToEditRound(Round round)
     {
         Navigation.NavigateTo($"/editround/{game.Id}/{round.Id}");
     }
+
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine($"GameScreen initializing with Id: {Id}");
@@ -194,7 +217,15 @@
     {
         if (firstRender)
         {
-            await JSRuntime.InvokeVoidAsync("setupInputFocus");
+            try
+            {
+                await JSRuntime.InvokeVoidAsync("setupInputFocus");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error setting up input focus: {ex.Message}");
+                // Continue without failing
+            }
         }
     }
 
@@ -354,7 +385,6 @@
         {
             try
             {
-                // Remove from local collection
                 game.Rounds.Remove(roundToDelete);
 
                 // Update round numbers for all subsequent rounds
@@ -364,7 +394,6 @@
                     r.RoundNumber = index++;
                 }
 
-                // Save to database
                 await DbService.DeleteRoundAsync(roundToDelete.Id);
                 await DbService.SaveGameAsync(game);
 
