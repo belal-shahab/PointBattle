@@ -27,6 +27,9 @@ namespace PointBattle.Services
             new LanguageOption { Code = "ar", Name = "Arabic", NativeName = "العربية", Flag = "🇸🇦" }
         };
 
+        /// <summary>
+        /// Initializes the LocalizationService, setting up resource management and applying the saved or default language and culture settings.
+        /// </summary>
         public LocalizationService(IJSRuntime jsRuntime)
         {
             _jsRuntime = jsRuntime;
@@ -43,6 +46,12 @@ namespace PointBattle.Services
             Console.WriteLine($"LocalizationService initialized with language: {savedLanguage}, RTL: {IsRightToLeft}");
         }
 
+        /// <summary>
+        /// Prepares the localization service for use by marking the web view as ready and setting the text direction via JavaScript based on the current language's layout.
+        /// </summary>
+        /// <remarks>
+        /// This method should be called after the web view is available to ensure correct UI directionality for right-to-left or left-to-right languages.
+        /// </remarks>
         public async Task InitializeAsync()
         {
             try
@@ -57,6 +66,11 @@ namespace PointBattle.Services
             }
         }
         
+        /// <summary>
+        /// Retrieves the localized string for the specified key using the current culture.
+        /// </summary>
+        /// <param name="key">The resource key for the desired localized string.</param>
+        /// <returns>The localized string if found; otherwise, the key enclosed in brackets.</returns>
         public string GetString(string key)
         {
             try
@@ -71,6 +85,16 @@ namespace PointBattle.Services
             }
         }
         
+        /// <summary>
+        /// Changes the application's language and culture to the specified language code, updates preferences, applies culture settings, and triggers language change events.
+        /// </summary>
+        /// <param name="languageCode">The language code to set (e.g., "en", "ckb-iq", "ar").</param>
+        /// <remarks>
+        /// If the web view is ready, updates local storage and text direction via JavaScript interop. Invokes the <c>OnLanguageChanged</c> event after applying the new language.
+        /// </remarks>
+        /// <exception cref="Exception">
+        /// Thrown if an error occurs while setting the language or applying culture settings.
+        /// </exception>
         public async Task SetLanguageAsync(string languageCode)
         {
             if (_currentCulture.Name.Equals(languageCode, StringComparison.OrdinalIgnoreCase))
@@ -112,6 +136,10 @@ namespace PointBattle.Services
             }
         }
 
+        /// <summary>
+        /// Sets the application's culture and UI culture to the specified language code, with fallback to English if the specified culture cannot be applied.
+        /// </summary>
+        /// <param name="languageCode">The language code to apply (e.g., "en", "ar", "ckb-iq").</param>
         private void ApplyLanguage(string languageCode)
         {
             try

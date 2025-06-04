@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using MudBlazor.Services;
 using PointBattle.Services;
 using System.Globalization;
@@ -8,6 +8,10 @@ namespace PointBattle;
 
 public static class MauiProgram
 {
+    /// <summary>
+    /// Configures and builds the .NET MAUI application with fonts, Blazor WebView, MudBlazor, database, and localization services.
+    /// </summary>
+    /// <returns>The fully configured <see cref="MauiApp"/> instance.</returns>
     public static MauiApp CreateMauiApp()
     {
         var builder = MauiApp.CreateBuilder();

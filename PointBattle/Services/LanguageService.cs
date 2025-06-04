@@ -11,6 +11,9 @@ namespace PointBattle.Services
         
         public bool IsRightToLeft => CurrentLanguage == "ckb";
         
+        /// <summary>
+        /// Initializes the LanguageService by loading the saved language preference, applying the corresponding culture settings, and logging the initialization details.
+        /// </summary>
         public LanguageService()
         {
             // Get the saved language preference or use default
@@ -21,6 +24,10 @@ namespace PointBattle.Services
             Console.WriteLine($"Language service initialized with language: {savedLanguage}, RTL: {IsRightToLeft}");
         }
         
+        /// <summary>
+        /// Changes the application's language to the specified language code, updates culture settings, persists the preference, and notifies subscribers.
+        /// </summary>
+        /// <param name="languageCode">The language code to switch to (e.g., "en", "ckb").</param>
         public void ChangeLanguage(string languageCode)
         {
             if (CurrentLanguage == languageCode)
@@ -40,6 +47,11 @@ namespace PointBattle.Services
             LanguageChanged?.Invoke();
         }
 
+        /// <summary>
+        /// Sets the application's culture and UI culture to the specified language code, updating both current and default thread cultures.
+        /// Falls back to English if the specified culture cannot be applied.
+        /// </summary>
+        /// <param name="languageCode">The language code to apply (e.g., "en", "ckb").</param>
         private void ApplyLanguage(string languageCode)
         {
             try

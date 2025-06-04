@@ -1,4 +1,11 @@
-// Set document direction for RTL/LTR
+/**
+ * Sets the document's text direction to RTL or LTR and updates the UI layout accordingly.
+ *
+ * Applies the specified direction to the `<html>` element, toggles relevant CSS classes for RTL or LTR mode, and triggers layout and UI element adjustments to ensure consistent appearance. Returns `true` if the operation succeeds, or `false` if an error occurs.
+ *
+ * @param {string} dir - The desired text direction, either 'rtl' or 'ltr'.
+ * @returns {boolean} `true` if the direction was set successfully; `false` if an error occurred.
+ */
 function setDirection(dir) {
     console.log(`JavaScript: Setting document direction to: ${dir}`);
 
@@ -34,7 +41,13 @@ function setDirection(dir) {
     }
 }
 
-// Handle layout adjustments when direction changes
+/**
+ * Adjusts UI element alignment and layout based on the specified text direction.
+ *
+ * Updates text alignment for input fields, sets flex direction for button containers, and toggles RTL-specific classes on certain elements to match the given direction.
+ *
+ * @param {string} dir - The text direction, either 'rtl' or 'ltr'.
+ */
 function adjustLayoutForDirection(dir) {
     try {
         // Fix input field alignments
@@ -70,7 +83,13 @@ function adjustLayoutForDirection(dir) {
     }
 }
 
-// Ensure UI elements stay in correct positions
+/**
+ * Adjusts the fixed positioning and padding of key UI elements to maintain correct layout for the specified text direction.
+ *
+ * Ensures the `.top-row` and `.navbar-toggler` elements are fixed at the top of the viewport, with horizontal alignment based on {@link dir}. Adds top padding to the `<main>` element on small screens to prevent overlap.
+ *
+ * @param {string} dir - The text direction, either 'rtl' or 'ltr'.
+ */
 function ensureUIElementsPosition(dir) {
     try {
         // Keep top-row and navbar elements in fixed positions
