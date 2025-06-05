@@ -2,6 +2,7 @@
 @inject NavigationManager Navigation
 @inject LocalizationService Loc
 @implements IDisposable
+@using Microsoft.AppCenter.Analytics
 
 <div class="main-container">
     <div class="title">
@@ -20,30 +21,69 @@
     protected override void OnInitialized()
     {
         Loc.OnLanguageChanged += OnLanguageChanged;
+        
+        // Track when user opens the home page
+        Analytics.TrackEvent("Home Page Loaded", new Dictionary<string, string>
+        {
+            {"Language", Loc.CurrentLanguage},
+            {"AppVersion", "1.0"},
+            {"Timestamp", DateTime.Now.ToString()}
+        });
     }
-
+    
     private void OnLanguageChanged()
     {
         InvokeAsync(StateHasChanged);
+        
+        // Track language changes
+        Analytics.TrackEvent("Language Changed", new Dictionary<string, string>
+        {
+            {"NewLanguage", Loc.CurrentLanguage},
+            {"Page", "Home"}
+        });
     }
-
+    
     public void Dispose()
     {
         Loc.OnLanguageChanged -= OnLanguageChanged;
     }
-
+    
     private void NewGame()
     {
+        // Track when user clicks New Game
+        Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+        {
+            {"ButtonName", "NewGame"},
+            {"Page", "Home"},
+            {"Language", Loc.CurrentLanguage}
+        });
+        
         Navigation.NavigateTo("/newgame");
     }
-
+    
     private void ViewHistory()
     {
+        // Track when user clicks Game History
+        Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+        {
+            {"ButtonName", "GameHistory"},
+            {"Page", "Home"},
+            {"Language", Loc.CurrentLanguage}
+        });
+        
         Navigation.NavigateTo("/history");
     }
-
+    
     private void ViewAbout()
     {
+        // Track when user clicks About
+        Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+        {
+            {"ButtonName", "About"},
+            {"Page", "Home"},
+            {"Language", Loc.CurrentLanguage}
+        });
+        
         Navigation.NavigateTo("/about");
     }
 }
