@@ -23,7 +23,7 @@ namespace PointBattle.Services
         public List<LanguageOption> SupportedLanguages => new List<LanguageOption>
         {
             new LanguageOption { Code = "en", Name = "English", NativeName = "English", Flag = "🇺🇸" },
-            new LanguageOption { Code = "ckb-iq", Name = "Kurdish", NativeName = "کوردی", Flag = "☀️" },
+            new LanguageOption { Code = "ckb-iq", Name = "Kurdish", NativeName = "کوردی", Flag = "Ku" },
             new LanguageOption { Code = "ar", Name = "Arabic", NativeName = "العربية", Flag = "🇸🇦" }
         };
 

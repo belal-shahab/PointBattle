@@ -255,4 +255,7 @@
   <data name="test" xml:space="preserve">
     <value>لەگەڵ هاوڕێکانت بەدواداچوون بۆ خاڵەکانی یارییەکەت بکە!</value>
   </data>
+  <data name="AboutTheAppDescription" xml:space="preserve">
+    <value>PointBattle ئەپێکی سادەیە کە بۆ بەدواداچوونی خاڵەکانی یاری (ئۆکە) لە نێوان یاریزان یان تیمەکاندا دروستکراوە. تەواو بۆ یارییەکان، پێشبڕکییەکان یان هەر چالاکییەک کە پێویستت بە خاڵ هەژمارتنە.</value>
+</data>
 </root>

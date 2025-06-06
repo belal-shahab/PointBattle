@@ -243,4 +243,8 @@
   <data name="test" xml:space="preserve">
     <value>Track your game points with friends!</value>
   </data>
+  <data name="AboutTheAppDescription" xml:space="preserve">
+    <value>PointBattle is a simple app designed to track scores game (Okey) between players or teams. Perfect for games, competitions, or any activity where you need to keep score.</value>
+</data>
 </root>
+

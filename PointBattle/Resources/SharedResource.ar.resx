@@ -255,4 +255,7 @@
     <data name="test" xml:space="preserve">
         <value>تتبع نقاط ألعابك مع الأصدقاء!</value>
     </data>
+    <data name="AboutTheAppDescription" xml:space="preserve">
+    <value>PointBattle هو تطبيق بسيط مصمم لتتبع نقاط لعبة (أوكي) بين اللاعبين أو الفرق. مثالي للألعاب والمسابقات أو أي نشاط تحتاج فيه لحفظ النقاط.</value>
+</data>
 </root>

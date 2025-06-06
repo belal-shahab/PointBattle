@@ -7,7 +7,13 @@
 @implements IDisposable
 
 <div class="history-container">
-    <h2><LocalizedText Key="GameDashboard" /></h2>
+    <!-- Add back button at the top -->
+    <div class="page-header">
+        <button class="back-button" @onclick="BackToHome">
+            <span>←</span> <LocalizedText Key="Back" />
+        </button>
+        <h2><LocalizedText Key="GameDashboard" /></h2>
+    </div>
 
     @if (games.Count == 0)
     {
@@ -128,9 +134,11 @@
         }
     }
 
+    <!-- Keep the bottom back button as well, or remove if not needed -->
     <div class="button-container">
         <button class="btn secondary" @onclick="BackToHome"><LocalizedText Key="Back" /></button>
     </div>
+    
     @if (gameToEdit != null)
     {
         <div class="modal-overlay" @onclick="CancelEdit">
@@ -167,6 +175,7 @@
 </div>
 
 @code {
+    // ... rest of your existing code remains the same
     private List<Game> games = new List<Game>();
     private List<Game> todayGames = new List<Game>();
     private bool showAllGames = false;

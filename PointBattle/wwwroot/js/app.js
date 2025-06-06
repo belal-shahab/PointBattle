@@ -113,6 +113,138 @@ function ensureUIElementsPosition(dir) {
     }
 }
 
+// Mobile Input Focus and Keyboard Handling
+let activeInput = null;
+let originalViewport = null;
+let keyboardHeight = 0;
+
+function setupMobileInputHandling() {
+    console.log("Setting up mobile input handling...");
+
+    // Store original viewport
+    const viewportMeta = document.querySelector('meta[name="viewport"]');
+    if (viewportMeta) {
+        originalViewport = viewportMeta.getAttribute('content');
+    }
+
+    // Add event listeners to all inputs
+    document.addEventListener('focusin', handleInputFocus, true);
+    document.addEventListener('focusout', handleInputBlur, true);
+
+    // Handle viewport changes (keyboard appearance)
+    window.addEventListener('resize', handleViewportResize);
+
+    // Visual viewport API for better keyboard detection
+    if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', handleVisualViewportChange);
+    }
+}
+
+function handleInputFocus(event) {
+    const input = event.target;
+    if (input && (input.type === 'text' || input.type === 'number' || input.tagName === 'TEXTAREA')) {
+        console.log("Input focused:", input);
+        activeInput = input;
+
+        // Add focused class for styling
+        input.classList.add('input-focused');
+
+        // Scroll input into view after a short delay
+        setTimeout(() => {
+            scrollInputIntoView(input);
+        }, 300);
+
+        // Prevent zoom on iOS
+        if (isIOS()) {
+            input.style.fontSize = '16px';
+        }
+    }
+}
+
+function handleInputBlur(event) {
+    const input = event.target;
+    if (input && (input.type === 'text' || input.type === 'number' || input.tagName === 'TEXTAREA')) {
+        console.log("Input blurred:", input);
+        input.classList.remove('input-focused');
+
+        if (activeInput === input) {
+            activeInput = null;
+        }
+
+        // Reset font size
+        if (isIOS() && input.style.fontSize === '16px') {
+            input.style.fontSize = '';
+        }
+    }
+}
+
+function scrollInputIntoView(input) {
+    if (!input) return;
+
+    try {
+        console.log("Scrolling input into view:", input);
+
+        // Calculate the position to scroll to
+        const inputRect = input.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+
+        // Calculate keyboard height (estimated)
+        const estimatedKeyboardHeight = Math.max(250, viewportHeight * 0.35);
+
+        // Calculate the target scroll position
+        const targetY = inputRect.top + window.pageYOffset - (viewportHeight - estimatedKeyboardHeight) / 2;
+
+        // Smooth scroll to the input
+        window.scrollTo({
+            top: Math.max(0, targetY),
+            behavior: 'smooth'
+        });
+
+        // Alternative method using scrollIntoView
+        setTimeout(() => {
+            input.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center',
+                inline: 'nearest'
+            });
+        }, 100);
+
+    } catch (error) {
+        console.error("Error scrolling input into view:", error);
+    }
+}
+
+function handleViewportResize() {
+    if (activeInput) {
+        setTimeout(() => {
+            scrollInputIntoView(activeInput);
+        }, 100);
+    }
+}
+
+function handleVisualViewportChange() {
+    if (!window.visualViewport || !activeInput) return;
+
+    const viewport = window.visualViewport;
+    keyboardHeight = window.innerHeight - viewport.height;
+
+    console.log("Visual viewport changed, keyboard height:", keyboardHeight);
+
+    if (keyboardHeight > 100) { // Keyboard is open
+        setTimeout(() => {
+            scrollInputIntoView(activeInput);
+        }, 50);
+    }
+}
+
+function isIOS() {
+    return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+function isAndroid() {
+    return /Android/.test(navigator.userAgent);
+}
+
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
     console.log("JavaScript: DOM content loaded - initializing app.js");
@@ -123,6 +255,10 @@ document.addEventListener('DOMContentLoaded', function() {
         const isRtl = savedLanguage.toLowerCase().startsWith("ckb") || savedLanguage.toLowerCase().startsWith("ar");
         setDirection(isRtl ? "rtl" : "ltr");
         console.log(`JavaScript: Applied direction for language ${savedLanguage}: ${isRtl ? "rtl" : "ltr"}`);
+
+        // Setup mobile input handling
+        setupMobileInputHandling();
+
     } catch (error) {
         console.error("JavaScript: Error during initialization:", error);
     }
@@ -136,4 +272,53 @@ window.addEventListener('resize', function() {
     setTimeout(() => {
         ensureUIElementsPosition(currentDir);
     }, 100);
+});
+
+// Blazor interop functions
+window.scrollToInput = function(inputId) {
+    const input = document.getElementById(inputId);
+    if (input) {
+        setTimeout(() => {
+            scrollInputIntoView(input);
+        }, 100);
+    }
+};
+
+window.setupInputFocus = function() {
+    setupMobileInputHandling();
+};
+// Dark mode functionality
+window.setDarkMode = function(isDarkMode) {
+    console.log("Setting dark mode:", isDarkMode);
+
+    const html = document.documentElement;
+    const body = document.body;
+
+    if (isDarkMode) {
+        html.setAttribute('data-theme', 'dark');
+        body.classList.add('dark-mode');
+        body.classList.remove('light-mode');
+    } else {
+        html.setAttribute('data-theme', 'light');
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+    }
+
+    // Also apply to any dynamically created elements
+    const page = document.querySelector('.page');
+    if (page) {
+        page.setAttribute('data-theme', isDarkMode ? 'dark' : 'light');
+    }
+
+    return true;
+};
+
+// Initialize dark mode on page load
+document.addEventListener('DOMContentLoaded', function() {
+    try {
+        const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+        setDarkMode(savedDarkMode);
+    } catch (error) {
+        console.error("Error initializing dark mode:", error);
+    }
 });

@@ -2,10 +2,11 @@
 @using PointBattle.Services
 @using PointBattle.Components
 @inject LocalizationService Loc
+@inject DarkModeService DarkMode
 @inject IJSRuntime JSRuntime
 @implements IDisposable
 
-<div class="page @(Loc.IsRightToLeft ? "rtl-layout" : "")">
+<div class="page @(Loc.IsRightToLeft ? "rtl-layout" : "")" data-theme="@(DarkMode.IsDarkMode ? "dark" : "light")">
     <div class="sidebar">
         <NavMenu />
     </div>
@@ -15,8 +16,8 @@
                 <div class="app-brand">
                     <LocalizedText Key="AppName" />
                 </div>
-                <!-- Language switcher moved to a better position -->
-                <div class="language-switcher-container">
+                <div class="top-row-controls">
+                    <DarkModeToggle />
                     <LanguageSwitcher />
                 </div>
             </div>
@@ -31,6 +32,7 @@
     protected override void OnInitialized()
     {
         Loc.OnLanguageChanged += OnLanguageChanged;
+        DarkMode.OnDarkModeChanged += OnDarkModeChanged;
         Console.WriteLine($"MainLayout initialized with language: {Loc.CurrentLanguage}");
     }
 
@@ -41,6 +43,7 @@
             try
             {
                 await Loc.InitializeAsync();
+                await DarkMode.InitializeAsync();
                 StateHasChanged();
             }
             catch (Exception ex)
@@ -62,9 +65,15 @@
             Console.WriteLine($"Error in OnLanguageChanged: {ex.Message}");
         }
     }
+
+    private void OnDarkModeChanged()
+    {
+        InvokeAsync(StateHasChanged);
+    }
     
     public void Dispose()
     {
         Loc.OnLanguageChanged -= OnLanguageChanged;
+        DarkMode.OnDarkModeChanged -= OnDarkModeChanged;
     }
 }

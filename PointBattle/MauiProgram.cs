@@ -38,7 +38,7 @@ public static class MauiProgram
         // This ensures backward compatibility while we migrate components
         builder.Services.AddSingleton<LocalizationService>();
         builder.Services.AddSingleton<LanguageService>();
-        
+        builder.Services.AddScoped<DarkModeService>();
         // Get initial language
         var savedLanguage = Preferences.Get("app_language", "en");
         
