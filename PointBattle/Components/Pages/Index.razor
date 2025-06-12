@@ -2,11 +2,12 @@
 @inject NavigationManager Navigation
 @inject LocalizationService Loc
 @inject DatabaseService DbService
+@inject AppSessionService SessionService
 @implements IDisposable
 @using Microsoft.AppCenter.Analytics
 @using PointBattle.Models
 
-<!-- Auto-Recovery Loading Screen -->
+<!-- Auto-Recovery Loading Screen - Only on first app launch -->
 @if (isAutoRecovering)
 {
     <div class="auto-recovery-screen">
@@ -24,7 +25,7 @@
     </div>
 }
 
-<!-- Manual Recovery Modal (only shown if auto-recovery is disabled) -->
+<!-- Manual Recovery Modal (only shown if auto-recovery is disabled or user choice) -->
 @if (showRecoveryModal && incompleteGame != null && !isAutoRecovering)
 {
     <div class="modal-overlay" @onclick="CloseRecoveryModal">
@@ -69,7 +70,6 @@
 @code {
     private bool showRecoveryModal = false;
     private Game incompleteGame = null;
-    private bool hasCheckedOnce = false;
     private bool isAutoRecovering = false;
     private bool autoRecoveryEnabled = true; // Set to true for automatic recovery
 
@@ -79,15 +79,24 @@
         {
             Loc.OnLanguageChanged += OnLanguageChanged;
             
-            // Start auto-recovery immediately
-            await StartAutoRecovery();
+            // Only check for recovery on FIRST app launch, not when navigating back to this page
+            if (SessionService.IsFirstAppLaunch && !SessionService.HasCheckedForRecovery)
+            {
+                Console.WriteLine("First app launch - checking for game recovery");
+                await StartAutoRecovery();
+            }
+            else
+            {
+                Console.WriteLine("Not first launch or already checked - skipping recovery");
+            }
             
             // Track when user opens the home page
             Analytics.TrackEvent("Home Page Loaded", new Dictionary<string, string>
             {
                 {"Language", Loc.CurrentLanguage},
                 {"AppVersion", "1.0"},
-                {"Timestamp", DateTime.Now.ToString()}
+                {"Timestamp", DateTime.Now.ToString()},
+                {"IsFirstLaunch", SessionService.IsFirstAppLaunch.ToString()}
             });
         }
         catch (Exception ex)
@@ -100,10 +109,10 @@
     {
         try
         {
-            if (hasCheckedOnce) return;
-            hasCheckedOnce = true;
-
             Console.WriteLine("Starting auto-recovery process...");
+            
+            // Mark that we've checked for recovery in this session
+            SessionService.MarkRecoveryChecked();
             
             // Show recovery screen
             isAutoRecovering = true;

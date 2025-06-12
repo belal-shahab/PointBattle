@@ -37,6 +37,7 @@ public static class MauiProgram
         builder.Services.AddSingleton<DatabaseService>();
         builder.Services.AddSingleton<LocalizationService>();
         builder.Services.AddSingleton<LanguageService>();
+        builder.Services.AddSingleton<AppSessionService>(); // NEW: Add session service
         
         // Configure localization
         builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
