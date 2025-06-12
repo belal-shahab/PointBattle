@@ -21,41 +21,43 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
+
+        // Add Blazor WebView
         builder.Services.AddMauiBlazorWebView();
+
 #if DEBUG
         builder.Services.AddBlazorWebViewDeveloperTools();
         builder.Logging.AddDebug();
 #endif
+
+        // Add MudBlazor
         builder.Services.AddMudServices();
         
-        // Register the database service as a singleton
+        // Register services
         builder.Services.AddSingleton<DatabaseService>();
-        
-        // Configure localization with strongly typed resources
-        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
-        
-        // IMPORTANT: Register both services during transition!
-        // This ensures backward compatibility while we migrate components
         builder.Services.AddSingleton<LocalizationService>();
         builder.Services.AddSingleton<LanguageService>();
+        
+        // Configure localization
+        builder.Services.AddLocalization(options => options.ResourcesPath = "Resources");
+        
         // Get initial language
         var savedLanguage = Preferences.Get("app_language", "en");
         
-        // Configure supported cultures and set default
+        // Configure supported cultures
         var supportedCultures = new[] { 
             new CultureInfo("en"),
             new CultureInfo("ckb-iq"),
-            new CultureInfo("ar") // Added Arabic support
+            new CultureInfo("ar")
         };
         
-        // Set default cultures for the application
+        // Set default cultures
         CultureInfo.DefaultThreadCurrentCulture = new CultureInfo(savedLanguage);
         CultureInfo.DefaultThreadCurrentUICulture = new CultureInfo(savedLanguage);
 
-        // App Center configuration
         var app = builder.Build();
         
-        // Initialize App Center with your secret
+        // Initialize App Center
         AppCenter.Start("android=e61a914d-b8cb-4610-b55f-3778d9aca4cc", 
             typeof(Analytics), typeof(Crashes));
         

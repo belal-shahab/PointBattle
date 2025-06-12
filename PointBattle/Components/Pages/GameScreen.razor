@@ -26,6 +26,20 @@
         <div class="header">
             <h2 class="game-title"><LocalizedText Key="GameInProgress" /></h2>
 
+            <!-- Auto-save indicator -->
+            @if (isSaving)
+            {
+                <div class="auto-save-indicator">
+                    <span>💾 Saving...</span>
+                </div>
+            }
+            else if (lastSaveTime.HasValue)
+            {
+                <div class="auto-save-indicator saved">
+                    <span>✅ Saved @lastSaveTime.Value.ToString("HH:mm:ss")</span>
+                </div>
+            }
+
             <!-- Replace the existing score-container section with this -->
             <div class="score-container">
                 <div class="scores-row">
@@ -132,7 +146,16 @@
                            @ref="teamBInputRef"/>
                     <span class="helper-text"><LocalizedText Key="Max" />: @Game.MaxPointsPerRound</span>
                 </div>
-                <button class="btn primary" @onclick="AddRound"><LocalizedText Key="AddRound" /></button>
+                <button class="btn primary" @onclick="AddRound" disabled="@isSaving">
+                    @if (isSaving)
+                    {
+                        <span>💾 Saving...</span>
+                    }
+                    else
+                    {
+                        <span><LocalizedText Key="AddRound" /></span>
+                    }
+                </button>
             </div>
         }
 
@@ -151,7 +174,7 @@
                     </div>
                     <div class="modal-actions">
                         <button class="btn secondary" @onclick="CancelEdit"><LocalizedText Key="Cancel" /></button>
-                        <button class="btn primary" @onclick="SaveEdit"><LocalizedText Key="Save" /></button>
+                        <button class="btn primary" @onclick="SaveEdit" disabled="@isSaving"><LocalizedText Key="Save" /></button>
                     </div>
                 </div>
             </div>
@@ -163,6 +186,7 @@
         </div>
     }
 </div>
+
 
 @code {
     [Parameter] public int Id { get; set; }
@@ -182,6 +206,10 @@
     private ElementReference teamBInputRef;
     private bool teamAInputClicked = false;
     private bool teamBInputClicked = false;
+
+    // Auto-save related properties
+    private bool isSaving = false;
+    private DateTime? lastSaveTime;
     
     protected override void OnInitialized()
     {
@@ -198,7 +226,7 @@
     
     public void Dispose()
     {
-        // Unsubscribe when component is disposed
+        // Clean up
         Loc.OnLanguageChanged -= OnLanguageChanged;
     }
 
@@ -261,6 +289,9 @@
             {
                 game = loadedGame;
                 Console.WriteLine($"Game loaded: {game.GroupA} vs {game.GroupB}, Rounds: {game.Rounds.Count}");
+                
+                // Mark as no unsaved changes since we just loaded
+                lastSaveTime = DateTime.Now;
             }
             else
             {
@@ -283,25 +314,32 @@
 
     private async Task AddRound()
     {
-        if (game.Rounds.Count >= Game.MaxRounds) return;
+        if (game.Rounds.Count >= Game.MaxRounds || isSaving) return;
 
         try
         {
-            var round = new Round
-            {
-                GameId = game.Id,
-                RoundNumber = game.Rounds.Count + 1,
-                GroupAPoints = Math.Min(newRoundA, Game.MaxPointsPerRound),
-                GroupBPoints = Math.Min(newRoundB, Game.MaxPointsPerRound)
-            };
+            isSaving = true;
+            StateHasChanged();
 
+            // Add round to database immediately
+            var round = await DbService.AddRoundImmediatelyAsync(
+                game.Id,
+                game.Rounds.Count + 1,
+                Math.Min(newRoundA, Game.MaxPointsPerRound),
+                Math.Min(newRoundB, Game.MaxPointsPerRound)
+            );
+
+            // Add to local game object
             game.Rounds.Add(round);
-            await DbService.SaveGameAsync(game);
-
+            
+            // Reset input values
             newRoundA = 0;
             newRoundB = 0;
             teamAInputClicked = false;
             teamBInputClicked = false;
+            lastSaveTime = DateTime.Now;
+
+            Console.WriteLine($"Successfully added round {round.RoundNumber}");
 
             // Check if this was the last round
             if (game.Rounds.Count >= Game.MaxRounds)
@@ -312,6 +350,11 @@
         catch (Exception ex)
         {
             Console.WriteLine($"Error adding round: {ex}");
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
         }
     }
 
@@ -331,38 +374,34 @@
 
     private async Task SaveEdit()
     {
-        if (editingRound == null) return;
+        if (editingRound == null || isSaving) return;
 
         try
         {
+            isSaving = true;
+            StateHasChanged();
+
             // Update the round's points
-            int originalId = editingRound.Id;
-            int originalGameId = editingRound.GameId;
-            int originalRoundNumber = editingRound.RoundNumber;
+            editingRound.GroupAPoints = Math.Min(Math.Max(0, editingRoundA), Game.MaxPointsPerRound);
+            editingRound.GroupBPoints = Math.Min(Math.Max(0, editingRoundB), Game.MaxPointsPerRound);
         
-            // Create a new round object to avoid reference issues
-            var roundToUpdate = new Round
-            {
-                Id = originalId,
-                GameId = originalGameId,
-                RoundNumber = originalRoundNumber,
-                GroupAPoints = Math.Min(Math.Max(0, editingRoundA), Game.MaxPointsPerRound),
-                GroupBPoints = Math.Min(Math.Max(0, editingRoundB), Game.MaxPointsPerRound)
-            };
-        
-            // Update in database
-            await DbService.UpdateRoundAsync(roundToUpdate);
+            // Update in database immediately
+            await DbService.UpdateRoundAsync(editingRound);
         
             // Reset editing state
             editingRound = null;
+            lastSaveTime = DateTime.Now;
         
-            // Reload the game to refresh all data
-            await LoadGame();
+            Console.WriteLine("Successfully updated round");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error saving round edit: {ex.Message}");
-            editingRound = null;
+        }
+        finally
+        {
+            isSaving = false;
+            StateHasChanged();
         }
     }
 
@@ -381,10 +420,17 @@
 
     private async Task ConfirmDelete()
     {
-        if (roundToDelete != null)
+        if (roundToDelete != null && !isSaving)
         {
             try
             {
+                isSaving = true;
+                StateHasChanged();
+
+                // Delete from database immediately
+                await DbService.DeleteRoundAsync(roundToDelete.Id);
+                
+                // Remove from local game
                 game.Rounds.Remove(roundToDelete);
 
                 // Update round numbers for all subsequent rounds
@@ -392,40 +438,60 @@
                 foreach (var r in game.Rounds.OrderBy(r => r.RoundNumber))
                 {
                     r.RoundNumber = index++;
+                    await DbService.UpdateRoundAsync(r);
                 }
-
-                await DbService.DeleteRoundAsync(roundToDelete.Id);
-                await DbService.SaveGameAsync(game);
 
                 roundToDelete = null;
                 showDeleteConfirm = false;
+                lastSaveTime = DateTime.Now;
 
-                await LoadGame();
+                Console.WriteLine("Successfully deleted round");
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Error deleting round: {ex}");
+            }
+            finally
+            {
+                isSaving = false;
+                StateHasChanged();
             }
         }
     }
 
     private async Task FinishGame()
     {
-        if (game.GroupATotal > game.GroupBTotal)
-            game.Winner = game.GroupA;
-        else if (game.GroupBTotal > game.GroupATotal)
-            game.Winner = game.GroupB;
-        else
-            game.Winner = "Tie";
+        try
+        {
+            isSaving = true;
+            StateHasChanged();
 
-        game.IsCompleted = true;
-        await DbService.SaveGameAsync(game);
-        Navigation.NavigateTo("/gameresult/" + Id);
+            if (game.GroupATotal > game.GroupBTotal)
+                game.Winner = game.GroupA;
+            else if (game.GroupBTotal > game.GroupATotal)
+                game.Winner = game.GroupB;
+            else
+                game.Winner = "Tie";
+
+            game.IsCompleted = true;
+            
+            // Save final game state immediately
+            await DbService.SaveGameAsync(game);
+           
+            Navigation.NavigateTo("/gameresult/" + Id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error finishing game: {ex}");
+        }
+        finally
+        {
+            isSaving = false;
+        }
     }
 
     private void BackToHome()
     {
         Navigation.NavigateTo("/");
     }
-
 }

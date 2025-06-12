@@ -17,6 +17,12 @@ public class Game
     public string Winner { get; set; } = "";
     public bool IsCompleted { get; set; } = false;
     
+    // NEW: Last updated timestamp for recovery
+    public DateTime LastUpdated { get; set; } = DateTime.Now;
+    
+    // NEW: Flag to track if game was recovered
+    public bool WasRecovered { get; set; } = false;
+    
     [Ignore]
     public List<Round> Rounds { get; set; } = new List<Round>();
     
@@ -69,6 +75,15 @@ public class Game
     {
         return GroupBTotal - GroupATotal + 1;
     }
+
+    // NEW: Check if game is recoverable (has rounds but not completed)
+    [Ignore]
+    public bool IsRecoverable => Rounds.Count > 0 && !IsCompleted;
+
+    // NEW: Get recovery info string
+    [Ignore]
+    public string RecoveryInfo => IsRecoverable ? 
+        $"Round {Rounds.Count}/{MaxRounds} - {GroupATotal}:{GroupBTotal}" : "";
 }
 
 [Table("rounds")]
@@ -82,4 +97,7 @@ public class Round
     public int RoundNumber { get; set; }
     public int GroupAPoints { get; set; }
     public int GroupBPoints { get; set; }
+    
+    // NEW: Timestamp when round was added
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 }

@@ -1,0 +1,29 @@
+.auto-save-indicator {
+    position: fixed;
+    top: 70px;
+    right: 16px;
+    background: #ff9800;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    z-index: 1001;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    animation: pulse 1s infinite;
+}
+
+.auto-save-indicator.saved {
+    background: #4CAF50;
+    animation: none;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+[dir="rtl"] .auto-save-indicator {
+    right: auto;
+    left: 16px;
+}

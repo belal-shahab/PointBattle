@@ -1,89 +1,316 @@
 @page "/"
 @inject NavigationManager Navigation
 @inject LocalizationService Loc
+@inject DatabaseService DbService
 @implements IDisposable
 @using Microsoft.AppCenter.Analytics
+@using PointBattle.Models
 
-<div class="main-container">
+<!-- Auto-Recovery Loading Screen -->
+@if (isAutoRecovering)
+{
+    <div class="auto-recovery-screen">
+        <div class="recovery-content">
+            <div class="recovery-icon">🎮</div>
+            <h2>Resuming Your Game...</h2>
+            <p>@incompleteGame?.GroupAFullName vs @incompleteGame?.GroupBFullName</p>
+            <p>Round @incompleteGame?.Rounds.Count of @Game.MaxRounds</p>
+            <div class="loading-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- Manual Recovery Modal (only shown if auto-recovery is disabled) -->
+@if (showRecoveryModal && incompleteGame != null && !isAutoRecovering)
+{
+    <div class="modal-overlay" @onclick="CloseRecoveryModal">
+        <div class="modal recovery-modal" @onclick:stopPropagation="true">
+            <h3>🎮 Game Found!</h3>
+            <p>You have an unfinished game</p>
+            <div class="game-info">
+                <strong>@incompleteGame.GroupAFullName vs @incompleteGame.GroupBFullName</strong>
+                <br />
+                <small>Round @incompleteGame.Rounds.Count of @Game.MaxRounds</small>
+                <br />
+                <small>Score: @incompleteGame.GroupATotal - @incompleteGame.GroupBTotal</small>
+            </div>
+            <div class="modal-actions">
+                <button class="btn secondary" @onclick="CloseRecoveryModal">Start New</button>
+                <button class="btn primary" @onclick="ResumeGame">Resume</button>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="main-container" style="@(isAutoRecovering ? "display: none;" : "")">
     <div class="title">
         <h1><LocalizedText Key="AppName" /></h1>
         <p><LocalizedText Key="test" /></p>
     </div>
     
     <div class="button-container">
-        <button class="btn primary" @onclick="NewGame"><LocalizedText Key="NewGame" /></button>
-        <button class="btn secondary" @onclick="ViewHistory"><LocalizedText Key="GameHistory" /></button>
-        <button class="btn info" @onclick="ViewAbout">ℹ️ <LocalizedText Key="About" /></button>
+        <button class="btn primary" @onclick="NewGame">
+            <LocalizedText Key="NewGame" />
+        </button>
+        <button class="btn secondary" @onclick="ViewHistory">
+            <LocalizedText Key="GameHistory" />
+        </button>
+        <button class="btn info" @onclick="ViewAbout">
+            ℹ️ <LocalizedText Key="About" />
+        </button>
     </div>
 </div>
 
+
 @code {
-    protected override void OnInitialized()
+    private bool showRecoveryModal = false;
+    private Game incompleteGame = null;
+    private bool hasCheckedOnce = false;
+    private bool isAutoRecovering = false;
+    private bool autoRecoveryEnabled = true; // Set to true for automatic recovery
+
+    protected override async Task OnInitializedAsync()
     {
-        Loc.OnLanguageChanged += OnLanguageChanged;
-        
-        // Track when user opens the home page
-        Analytics.TrackEvent("Home Page Loaded", new Dictionary<string, string>
+        try
         {
-            {"Language", Loc.CurrentLanguage},
-            {"AppVersion", "1.0"},
-            {"Timestamp", DateTime.Now.ToString()}
-        });
+            Loc.OnLanguageChanged += OnLanguageChanged;
+            
+            // Start auto-recovery immediately
+            await StartAutoRecovery();
+            
+            // Track when user opens the home page
+            Analytics.TrackEvent("Home Page Loaded", new Dictionary<string, string>
+            {
+                {"Language", Loc.CurrentLanguage},
+                {"AppVersion", "1.0"},
+                {"Timestamp", DateTime.Now.ToString()}
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnInitializedAsync: {ex.Message}");
+        }
+    }
+
+    private async Task StartAutoRecovery()
+    {
+        try
+        {
+            if (hasCheckedOnce) return;
+            hasCheckedOnce = true;
+
+            Console.WriteLine("Starting auto-recovery process...");
+            
+            // Show recovery screen
+            isAutoRecovering = true;
+            StateHasChanged();
+            
+            // Give the UI time to render
+            await Task.Delay(500);
+            
+            // Check for incomplete games
+            incompleteGame = await DbService.GetMostRecentIncompleteGameAsync();
+            
+            if (incompleteGame != null && incompleteGame.Rounds.Count > 0)
+            {
+                Console.WriteLine($"Auto-recovery: Found incomplete game with {incompleteGame.Rounds.Count} rounds");
+                
+                // Track recovery
+                Analytics.TrackEvent("Auto Recovery Started", new Dictionary<string, string>
+                {
+                    {"GameId", incompleteGame.Id.ToString()},
+                    {"RoundsCount", incompleteGame.Rounds.Count.ToString()},
+                    {"Teams", $"{incompleteGame.GroupA} vs {incompleteGame.GroupB}"}
+                });
+                
+                // Show the recovery screen for 2 seconds so user sees what's happening
+                await Task.Delay(2000);
+                
+                if (autoRecoveryEnabled)
+                {
+                    // Automatically navigate to the game
+                    Console.WriteLine($"Auto-recovery: Navigating to game {incompleteGame.Id}");
+                    Navigation.NavigateTo($"/game/{incompleteGame.Id}");
+                    return;
+                }
+                else
+                {
+                    // Show manual recovery modal
+                    isAutoRecovering = false;
+                    showRecoveryModal = true;
+                    StateHasChanged();
+                    return;
+                }
+            }
+            else
+            {
+                Console.WriteLine("Auto-recovery: No incomplete games found");
+            }
+            
+            // No incomplete games or auto-recovery disabled
+            isAutoRecovering = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Auto-recovery failed: {ex.Message}");
+            isAutoRecovering = false;
+            StateHasChanged();
+            
+            // Track the error
+            Analytics.TrackEvent("Auto Recovery Error", new Dictionary<string, string>
+            {
+                {"Error", ex.Message}
+            });
+        }
+    }
+
+    private void ResumeGame()
+    {
+        try
+        {
+            if (incompleteGame != null)
+            {
+                showRecoveryModal = false;
+                
+                Analytics.TrackEvent("Manual Recovery Accepted", new Dictionary<string, string>
+                {
+                    {"GameId", incompleteGame.Id.ToString()},
+                    {"RoundsCount", incompleteGame.Rounds.Count.ToString()}
+                });
+                
+                Navigation.NavigateTo($"/game/{incompleteGame.Id}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error resuming game: {ex.Message}");
+        }
+    }
+
+    private void CloseRecoveryModal()
+    {
+        try
+        {
+            showRecoveryModal = false;
+            
+            Analytics.TrackEvent("Manual Recovery Rejected", new Dictionary<string, string>
+            {
+                {"GameId", incompleteGame?.Id.ToString() ?? "unknown"},
+                {"Action", "StartNew"}
+            });
+            
+            incompleteGame = null;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error closing recovery modal: {ex.Message}");
+        }
     }
     
     private void OnLanguageChanged()
     {
-        InvokeAsync(StateHasChanged);
-        
-        // Track language changes
-        Analytics.TrackEvent("Language Changed", new Dictionary<string, string>
+        try
         {
-            {"NewLanguage", Loc.CurrentLanguage},
-            {"Page", "Home"}
-        });
+            InvokeAsync(StateHasChanged);
+            
+            Analytics.TrackEvent("Language Changed", new Dictionary<string, string>
+            {
+                {"NewLanguage", Loc.CurrentLanguage},
+                {"Page", "Home"}
+            });
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in OnLanguageChanged: {ex.Message}");
+        }
     }
     
     public void Dispose()
     {
-        Loc.OnLanguageChanged -= OnLanguageChanged;
+        try
+        {
+            Loc.OnLanguageChanged -= OnLanguageChanged;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in Dispose: {ex.Message}");
+        }
     }
     
     private void NewGame()
     {
-        // Track when user clicks New Game
-        Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+        try
         {
-            {"ButtonName", "NewGame"},
-            {"Page", "Home"},
-            {"Language", Loc.CurrentLanguage}
-        });
-        
-        Navigation.NavigateTo("/newgame");
+            // If auto-recovery is running, ignore clicks
+            if (isAutoRecovering) return;
+            
+            // If there's an incomplete game modal showing, close it first
+            if (showRecoveryModal)
+            {
+                CloseRecoveryModal();
+                return;
+            }
+            
+            Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+            {
+                {"ButtonName", "NewGame"},
+                {"Page", "Home"},
+                {"Language", Loc.CurrentLanguage}
+            });
+            
+            Navigation.NavigateTo("/newgame");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in NewGame: {ex.Message}");
+        }
     }
     
     private void ViewHistory()
     {
-        // Track when user clicks Game History
-        Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+        try
         {
-            {"ButtonName", "GameHistory"},
-            {"Page", "Home"},
-            {"Language", Loc.CurrentLanguage}
-        });
-        
-        Navigation.NavigateTo("/history");
+            if (isAutoRecovering) return;
+            
+            Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+            {
+                {"ButtonName", "GameHistory"},
+                {"Page", "Home"},
+                {"Language", Loc.CurrentLanguage}
+            });
+            
+            Navigation.NavigateTo("/history");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ViewHistory: {ex.Message}");
+        }
     }
     
     private void ViewAbout()
     {
-        // Track when user clicks About
-        Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+        try
         {
-            {"ButtonName", "About"},
-            {"Page", "Home"},
-            {"Language", Loc.CurrentLanguage}
-        });
-        
-        Navigation.NavigateTo("/about");
+            if (isAutoRecovering) return;
+            
+            Analytics.TrackEvent("Button Clicked", new Dictionary<string, string>
+            {
+                {"ButtonName", "About"},
+                {"Page", "Home"},
+                {"Language", Loc.CurrentLanguage}
+            });
+            
+            Navigation.NavigateTo("/about");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error in ViewAbout: {ex.Message}");
+        }
     }
 }
