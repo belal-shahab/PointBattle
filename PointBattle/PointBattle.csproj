@@ -30,33 +30,64 @@
         <!-- Versions -->
         <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
         <ApplicationVersion>1</ApplicationVersion>
+    </PropertyGroup>
 
-        <!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
-        <WindowsPackageType>None</WindowsPackageType>
+    <!-- Windows-specific configurations -->
+    <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">
+        <UseWinUI>true</UseWinUI>
+        <WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+        <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
 
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">15.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'maccatalyst'">15.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</SupportedOSPlatformVersion>
-        <TargetPlatformMinVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'windows'">10.0.17763.0</TargetPlatformMinVersion>
-        <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'tizen'">6.5</SupportedOSPlatformVersion>
+        <!-- Enable debugging -->
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>portable</DebugType>
+
+        <!-- WebView debugging -->
+        <BlazorWebViewDeveloperTools Condition="'$(Configuration)' == 'Debug'">true</BlazorWebViewDeveloperTools>
+
+        <!-- Disable problematic features for debugging -->
+        <RunAOTCompilation>false</RunAOTCompilation>
+        <PublishTrimmed>false</PublishTrimmed>
+    </PropertyGroup>
+
+    <!-- Android-specific configurations -->
+    <PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
+        <!-- Lower minimum version for compatibility -->
+        <SupportedOSPlatformVersion>21.0</SupportedOSPlatformVersion>
+        <TargetSdkVersion>34</TargetSdkVersion>
+
+        <!-- Architecture support -->
+        <AndroidSupportedAbis>armeabi-v7a;arm64-v8a</AndroidSupportedAbis>
+        <AndroidPackageFormats>apk</AndroidPackageFormats>
+
+        <!-- Disable problematic features for debugging -->
+        <RunAOTCompilation>false</RunAOTCompilation>
+        <PublishTrimmed>false</PublishTrimmed>
+        <AndroidLinkMode>None</AndroidLinkMode>
+
+        <!-- Enable debugging -->
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>portable</DebugType>
+
+        <!-- WebView debugging -->
+        <BlazorWebViewDeveloperTools Condition="'$(Configuration)' == 'Debug'">true</BlazorWebViewDeveloperTools>
     </PropertyGroup>
 
     <ItemGroup>
         <!-- App Icon -->
         <MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+        <MauiImage Include="wwwroot\images\kurdistan_flag.png" />
 
         <!-- Splash Screen -->
         <MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
 
         <!-- Images -->
         <MauiImage Include="Resources\Images\*" />
-        <MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
 
         <!-- Custom Fonts -->
         <MauiFont Include="Resources\Fonts\*" />
 
-        <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+        <!-- Raw Assets -->
         <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
     </ItemGroup>
 

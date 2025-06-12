@@ -1,6 +1,28 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-    <application android:allowBackup="true" android:icon="@mipmap/appicon" android:roundIcon="@mipmap/appicon_round" android:supportsRtl="true"></application>
+
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Features for better compatibility -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.faketouch" android:required="false" />
+
+    <!-- Support for different screen sizes -->
+    <supports-screens
+            android:smallScreens="true"
+            android:normalScreens="true"
+            android:largeScreens="true"
+            android:xlargeScreens="true"
+            android:anyDensity="true" />
+
+    <!-- Application with proper icon configuration -->
+    <application
+            android:allowBackup="true"
+            android:supportsRtl="true"
+            android:icon="@mipmap/appicon"
+            android:roundIcon="@mipmap/appicon_round">
+    </application>
+
 </manifest>

@@ -4,7 +4,14 @@
 
 <div class="mobile-language-switcher">
     <button class="mobile-language-button" @onclick="ToggleDropdown" @onclick:stopPropagation="true">
-        <span class="current-flag">@GetCurrentLanguageFlag()</span>
+        @if (GetCurrentLanguageFlag().StartsWith("image:"))
+        {
+            <img src="@GetCurrentLanguageFlag().Replace("image:", "")" class="current-flag-image" alt="Current Language" />
+        }
+        else
+        {
+            <span class="current-flag">@GetCurrentLanguageFlag()</span>
+        }
     </button>
     
     @if (showDropdown)
@@ -20,7 +27,14 @@
                     <button class="mobile-language-option @(IsCurrentLanguage(language.Code) ? "active" : "")" 
                             @onclick="() => SelectLanguage(language.Code)"
                             @onclick:stopPropagation="true">
-                        <span class="language-flag">@language.Flag</span>
+                        @if (language.Flag.StartsWith("image:"))
+                        {
+                            <img src="@language.Flag.Replace("image:", "")" class="language-flag-image" alt="@language.Name Flag" />
+                        }
+                        else
+                        {
+                            <span class="language-flag">@language.Flag</span>
+                        }
                         <div class="language-details">
                             <div class="language-name">@language.Name</div>
                             <div class="language-native">@language.NativeName</div>

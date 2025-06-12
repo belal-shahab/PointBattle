@@ -14,30 +14,236 @@
 </head>
 
 <body>
-    <div class="status-bar-safe-area"></div>
+<div class="status-bar-safe-area"></div>
 
-    <div id="app">Loading...</div>
+<div id="app">
+    <!-- Beautiful Loading Screen -->
+    <div id="loading-screen" style="
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        ">
+        <!-- App Logo -->
+        <div style="
+                width: 80px;
+                height: 80px;
+                background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: 24px;
+                font-size: 32px;
+                font-weight: 900;
+                color: white;
+                box-shadow: 0 8px 32px rgba(76, 175, 80, 0.3);
+                animation: logoFloat 2s ease-in-out infinite alternate;
+            ">PB</div>
 
-    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
+        <!-- App Name -->
+        <h1 style="
+                font-size: 36px;
+                margin: 0 0 16px 0;
+                font-weight: 700;
+                color: white;
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+                letter-spacing: 1px;
+                animation: titleGlow 2s ease-in-out infinite alternate;
+            ">PointBattle</h1>
+
+        <!-- Subtitle -->
+        <p style="
+                font-size: 16px;
+                margin: 0 0 32px 0;
+                color: rgba(255, 255, 255, 0.8);
+                font-weight: 400;
+                animation: subtitleFade 1.5s ease-in-out infinite alternate;
+            ">Track your game scores with style</p>
+
+        <!-- Loading Animation -->
+        <div style="
+                display: flex;
+                gap: 8px;
+                margin-bottom: 24px;
+            ">
+            <div style="
+                    width: 12px;
+                    height: 12px;
+                    background: white;
+                    border-radius: 50%;
+                    animation: dotBounce 1.4s ease-in-out infinite both;
+                    animation-delay: 0s;
+                "></div>
+            <div style="
+                    width: 12px;
+                    height: 12px;
+                    background: white;
+                    border-radius: 50%;
+                    animation: dotBounce 1.4s ease-in-out infinite both;
+                    animation-delay: 0.16s;
+                "></div>
+            <div style="
+                    width: 12px;
+                    height: 12px;
+                    background: white;
+                    border-radius: 50%;
+                    animation: dotBounce 1.4s ease-in-out infinite both;
+                    animation-delay: 0.32s;
+                "></div>
+        </div>
+
+        <!-- Loading Text -->
+        <div style="
+                color: rgba(255, 255, 255, 0.9);
+                font-size: 14px;
+                font-weight: 500;
+                animation: textPulse 2s ease-in-out infinite;
+            ">Loading your game experience...</div>
     </div>
 
-    <script src="_framework/blazor.webview.js" autostart="false"></script>
-    <script src="js/app.js"></script>
-    <script>
-        // Add this at the top of your body or head section
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if we need to apply RTL on startup
-            const language = localStorage.getItem('app_language');
-            if (language === 'ckb') {
-                document.documentElement.setAttribute('dir', 'rtl');
-                document.documentElement.style.direction = 'rtl';
-                document.body.classList.add('rtl-mode');
-            }
-        });
-    </script>
-</body>
+    <style>
+        @keyframes logoFloat {
+            0% { transform: translateY(0px); }
+            100% { transform: translateY(-8px); }
+        }
 
+        @keyframes titleGlow {
+            0% { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); }
+            100% { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 0 20px rgba(255, 255, 255, 0.3); }
+        }
+
+        @keyframes subtitleFade {
+            0% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes textPulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        /* Mobile responsive adjustments */
+        @media (max-width: 480px) {
+            #loading-screen h1 {
+                font-size: 28px !important;
+            }
+            #loading-screen p {
+                font-size: 14px !important;
+                padding: 0 20px;
+            }
+            #loading-screen > div:first-child {
+                width: 60px !important;
+                height: 60px !important;
+                font-size: 24px !important;
+            }
+        }
+    </style>
+</div>
+
+<div id="blazor-error-ui">
+    An unhandled error has occurred.
+    <a href="" class="reload">Reload</a>
+    <a class="dismiss">🗙</a>
+</div>
+
+<script src="_framework/blazor.webview.js" autostart="false"></script>
+<script src="js/app.js"></script>
+<script>
+    // RTL Language Detection
+    document.addEventListener('DOMContentLoaded', function() {
+        const language = localStorage.getItem('app_language');
+        if (language === 'ckb') {
+            document.documentElement.setAttribute('dir', 'rtl');
+            document.documentElement.style.direction = 'rtl';
+            document.body.classList.add('rtl-mode');
+        }
+    });
+
+    // Smooth loading screen removal
+    function hideLoadingScreen() {
+        const loadingScreen = document.getElementById('loading-screen');
+        if (loadingScreen) {
+            // Add fade out animation
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.transform = 'scale(0.95)';
+            loadingScreen.style.transition = 'all 0.5s ease-out';
+
+            setTimeout(() => {
+                loadingScreen.remove();
+            }, 500);
+        }
+    }
+
+    // Wait for Blazor to be ready and content to be loaded
+    let contentCheckInterval;
+    let emergencyTimeout;
+
+    function checkForContent() {
+        // Look for main content indicators
+        const mainContainer = document.querySelector('.main-container');
+        const title = document.querySelector('.title');
+        const buttonContainer = document.querySelector('.button-container');
+        const appContent = document.querySelector('.content');
+
+        // Check if content is actually rendered and visible
+        if ((mainContainer || title || buttonContainer) && appContent) {
+            clearInterval(contentCheckInterval);
+            clearTimeout(emergencyTimeout);
+
+            // Wait a tiny bit more to ensure smooth transition
+            setTimeout(() => {
+                hideLoadingScreen();
+            }, 300);
+
+            return true;
+        }
+        return false;
+    }
+
+    // Start checking after DOM is loaded
+    document.addEventListener('DOMContentLoaded', function() {
+        // Start checking for content every 100ms
+        contentCheckInterval = setInterval(checkForContent, 100);
+
+        // Emergency fallback after 4 seconds
+        emergencyTimeout = setTimeout(() => {
+            clearInterval(contentCheckInterval);
+            console.log('Emergency timeout: hiding loading screen');
+            hideLoadingScreen();
+        }, 4000);
+    });
+
+    // Also try to detect when Blazor signals it's ready
+    window.addEventListener('load', function() {
+        setTimeout(() => {
+            if (!checkForContent()) {
+                // If content still not found, wait a bit more
+                setTimeout(() => {
+                    checkForContent() || hideLoadingScreen();
+                }, 1000);
+            }
+        }, 500);
+    });
+</script>
+</body>
 </html>
